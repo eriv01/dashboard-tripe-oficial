@@ -14,10 +14,12 @@
         .live-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--success); }
         .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 16px; }
         .stat-label { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; }
         .stat-value { font-size: 32px; font-weight: 900; }
+        
         .funnel-container { background: var(--card); border: 1px solid var(--border); padding: 30px; border-radius: 24px; margin-bottom: 30px; }
         .funnel-step { display: flex; align-items: center; margin-bottom: 15px; position: relative; }
         .step-info { width: 200px; font-weight: 600; font-size: 14px; }
@@ -25,13 +27,6 @@
         .step-bar-fill { height: 100%; background: var(--primary); transition: width 1s ease; }
         .step-count { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); font-weight: 900; font-size: 14px; }
         .step-perc { margin-left: 15px; width: 60px; font-weight: 900; color: var(--muted); font-size: 14px; }
-        .variant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .variant-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 16px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; color: var(--muted); font-size: 11px; padding-bottom: 10px; }
-        td { padding: 10px 0; border-top: 1px solid var(--border); font-size: 13px; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; }
-        .badge-primary { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
@@ -40,26 +35,20 @@
             <h1>MÉTODO TRIPE <span style="color: var(--primary)">ANALYTICS</span></h1>
             <div class="live-indicator"><div class="dot"></div> LIVE MONITORING</div>
         </div>
+
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-label">Sessões Ativas</div><div class="stat-value" id="active-sessions">0</div></div>
             <div class="stat-card"><div class="stat-label">Processando (Fotos)</div><div class="stat-value" id="processing-sessions" style="color: #fbbf24">0</div></div>
             <div class="stat-card"><div class="stat-label">Vendas (Checkout)</div><div class="stat-value" id="total-sales" style="color: var(--success)">0</div></div>
             <div class="stat-card"><div class="stat-label">Conv. Geral</div><div class="stat-value" id="conv-rate">0%</div></div>
         </div>
+
         <div class="funnel-container">
             <div class="stat-label" style="margin-bottom: 20px">Funil de Conversão Real-time</div>
             <div id="funnel-display"></div>
         </div>
-        <div class="variant-grid">
-            <div class="variant-card">
-                <div class="stat-label">Performance de Copy (A/B Test)</div>
-                <table id="variant-table">
-                    <thead><tr><th>VARIANTE</th><th>TESTES</th><th>CONV.</th><th>%</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
     </div>
+
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
@@ -77,6 +66,7 @@
         const app = initializeApp(firebaseConfig );
         const db = getDatabase(app);
 
+        // Definição das etapas do funil, incluindo a nova etapa de processamento
         const funnelSteps = [
             { id: 0, label: "Início / Saudação" },
             { id: 1, label: "Pergunta 1" },
@@ -92,6 +82,7 @@
             const sessions = Object.values(data);
             const total = sessions.length;
             
+            // Atualiza os cards de estatísticas
             document.getElementById('active-sessions').innerText = total;
             const processing = sessions.filter(s => s.currentStep === 'processing').length;
             document.getElementById('processing-sessions').innerText = processing;
@@ -99,13 +90,23 @@
             document.getElementById('total-sales').innerText = sales;
             document.getElementById('conv-rate').innerText = total > 0 ? ((sales/total)*100).toFixed(1) + '%' : '0%';
 
+            // Renderiza o funil com a lógica de herança de passos
             const funnelHtml = funnelSteps.map(step => {
                 const count = sessions.filter(s => {
-                    if (step.id === 'processing') return s.currentStep === 'processing';
-                    if (step.id === 'result') return s.currentStep === 'result';
+                    // Se o usuário já passou por esse passo ou está em um passo posterior
+                    if (step.id === 'processing') return s.currentStep === 'processing' || s.currentStep === 'result' || s.status === 'checkout_clicked';
+                    if (step.id === 'result') return s.currentStep === 'result' || s.status === 'checkout_clicked';
                     if (step.id === 'checkout_clicked') return s.status === 'checkout_clicked';
-                    return s.currentStep >= step.id;
+                    
+                    // Para passos numéricos (perguntas)
+                    if (typeof step.id === 'number') {
+                        if (typeof s.currentStep === 'number') return s.currentStep >= step.id;
+                        // Se ele já está no processamento ou resultado, ele já passou pelas perguntas
+                        return s.currentStep === 'processing' || s.currentStep === 'result' || s.status === 'checkout_clicked';
+                    }
+                    return false;
                 }).length;
+
                 const perc = total > 0 ? (count/total*100).toFixed(0) : 0;
                 return `
                     <div class="funnel-step">
@@ -119,27 +120,6 @@
                 `;
             }).join('');
             document.getElementById('funnel-display').innerHTML = funnelHtml;
-        });
-
-        onValue(ref(db, 'optimization/variants'), (snapshot) => {
-            const data = snapshot.val() || {};
-            const tbody = document.querySelector('#variant-table tbody');
-            tbody.innerHTML = '';
-            
-            const types = ['saudacao', 'resultado', 'cta'];
-            types.forEach(type => {
-                for(let i=0; i<5; i++) {
-                    const v = data[`${type}_${i}`] || { tests: 0, converted: 0 };
-                    const perc = v.tests > 0 ? (v.converted/v.tests*100).toFixed(1) : 0;
-                    const row = `<tr>
-                        <td><span class="badge badge-primary">${type.toUpperCase()} ${i+1}</span></td>
-                        <td>${v.tests}</td>
-                        <td>${v.converted}</td>
-                        <td><strong>${perc}%</strong></td>
-                    </tr>`;
-                    tbody.innerHTML += row;
-                }
-            });
         });
     </script>
 </body>
