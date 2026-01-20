@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligência TRIPE - Dashboard Ultra v8.7</title>
+    <title>Inteligência TRIPE - Dashboard Ultra v8.8 (WIAPY)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,59 +14,28 @@
         .header h1 { font-weight: 900; font-size: 28px; letter-spacing: -1px; display: flex; align-items: center; gap: 10px; }
         .btn-reset { background: rgba(239, 68, 68, 0.1); color: var(--primary); border: 1px solid var(--primary); padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; transition: all 0.2s; }
         .btn-reset:hover { background: var(--primary); color: white; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 20px; }
-        .stat-label { color: var(--muted); font-size: 12px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .stat-value { font-size: 36px; font-weight: 900; display: block; }
-        .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
+        
+        /* Stats Grid com Foco em Vendas */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; }
+        .stat-label { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block; }
+        .stat-value { font-size: 28px; font-weight: 900; display: block; }
+        
         .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; margin-bottom: 20px; }
         .card-title { font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
         
-        /* Atividade Real Estilizada */
-        .activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
-        .activity-item { background: #0f0f0f; border: 1px solid var(--border); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; transition: all 0.3s; }
-        .activity-item.online { border-left: 4px solid var(--success); }
-        .activity-item.converted { border-color: var(--success); background: rgba(34, 197, 94, 0.05); }
-        .activity-top { display: flex; justify-content: space-between; align-items: center; }
-        .user-tag { font-weight: 900; font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 8px; }
-        .user-num { background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
-        .status-badge { font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
-        .status-online { background: rgba(34, 197, 94, 0.1); color: var(--success); }
-        .status-offline { background: rgba(156, 163, 175, 0.1); color: var(--muted); }
-        .activity-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; }
-        .detail-box { background: #1a1a1a; padding: 8px; border-radius: 6px; border: 1px solid var(--border); }
-        .detail-label { color: var(--muted); font-size: 9px; text-transform: uppercase; margin-bottom: 4px; display: block; }
-        .detail-value { font-weight: 700; color: var(--text); }
-        .copy-angles { display: flex; gap: 5px; margin-top: 5px; }
-        .angle-tag { font-size: 9px; background: #262626; padding: 2px 6px; border-radius: 3px; color: var(--muted); border: 1px solid var(--border); }
+        /* Tabela de Variantes com Vendas Reais */
+        .variant-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .variant-table th { text-align: left; color: var(--muted); padding: 12px; border-bottom: 1px solid var(--border); text-transform: uppercase; font-size: 10px; }
+        .variant-table td { padding: 15px 12px; border-bottom: 1px solid var(--border); }
+        .badge-status { padding: 4px 8px; border-radius: 4px; font-weight: 900; font-size: 9px; }
+        .badge-paid { background: rgba(34, 197, 94, 0.1); color: var(--success); border: 1px solid var(--success); }
+        .badge-pending { background: rgba(251, 191, 36, 0.1); color: var(--gold); border: 1px solid var(--gold); }
+        .badge-abandon { background: rgba(239, 68, 68, 0.1); color: var(--primary); border: 1px solid var(--primary); }
 
-        .variant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .variant-group { background: #0f0f0f; border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
-        .variant-group-title { font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; }
-        .variant-row { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; padding: 10px; border-radius: 8px; transition: all 0.3s; border: 1px solid transparent; }
-        .variant-row.winner { border-color: var(--success); background: rgba(34, 197, 94, 0.05); }
-        .variant-info { display: flex; justify-content: space-between; align-items: center; }
-        .variant-name { font-weight: 700; font-size: 13px; }
-        .variant-stats { font-size: 11px; color: var(--muted); }
-        .variant-rate { font-weight: 900; font-size: 14px; color: var(--text); }
-        .variant-row.winner .variant-rate { color: var(--success); }
-        .progress-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 1s ease; }
-        .variant-row.winner .progress-fill { background: var(--success); }
-
-        .history-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 15px; overflow: hidden; }
-        .history-header { background: #1a1a1a; padding: 18px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 900; font-size: 14px; transition: background 0.2s; border-left: 4px solid var(--primary); }
-        .history-header:hover { background: #262626; }
-        .history-content { padding: 25px; display: none; background: #0f0f0f; border-top: 1px solid var(--border); }
-        .history-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 20px; }
-        .history-mini-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-        .history-mini-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; font-weight: 900; }
+        .activity-item { background: #0f0f0f; border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 10px; }
+        .activity-item.paid { border-left: 4px solid var(--success); background: rgba(34, 197, 94, 0.05); }
         
-        .age-bar-container { margin-bottom: 15px; }
-        .age-label { font-size: 11px; font-weight: 700; margin-bottom: 5px; display: flex; justify-content: space-between; }
-        .age-bar-bg { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-        .age-bar-fill { height: 100%; background: var(--blue); border-radius: 4px; transition: width 1s ease; }
-
         .live-tag { background: var(--success); color: black; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 900; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
@@ -74,80 +43,53 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.7</span></h1>
+            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.8</span></h1>
             <div style="display: flex; gap: 15px; align-items: center;">
-                <div class="live-tag">LIVE: MONITORANDO</div>
+                <div class="live-tag">WIAPY CONNECTED</div>
                 <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
             </div>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-card"><span class="stat-label">Visitas (Hoje)</span><span class="stat-value" id="total-visits">0</span></div>
-            <div class="stat-card"><span class="stat-label">Checkouts (Hoje)</span><span class="stat-value" id="total-checkouts" style="color: var(--success)">0</span></div>
-            <div class="stat-card"><span class="stat-label">Conv. Geral</span><span class="stat-value" id="conv-rate">0.0%</span></div>
-            <div class="stat-card"><span class="stat-label">Online Agora</span><span class="stat-value" id="online-now" style="color: #fbbf24">0</span></div>
-        </div>
-
-        <div class="main-grid">
-            <div class="card">
-                <div class="card-title">📈 Fluxo de Acessos (24h)</div>
-                <canvas id="hourChart" height="180"></canvas>
-            </div>
-            <div class="card">
-                <div class="card-title">🏆 Variante Campeã Geral</div>
-                <div id="winner-box" style="text-align: center; padding: 20px 0;">
-                    <div id="winner-name" style="font-size: 24px; font-weight: 900; color: var(--success); margin-bottom: 10px;">---</div>
-                    <button class="btn-reset" style="width: 100%; padding: 15px; border-color: var(--success); color: var(--success);" id="fix-winner">FIXAR VENCEDORA</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-grid">
-            <div class="card">
-                <div class="card-title">📊 Funil de Fuga (Drop-off)</div>
-                <canvas id="funnelChart" height="200"></canvas>
-            </div>
-            <div class="card">
-                <div class="card-title">👥 Perfil por Idade</div>
-                <div id="age-distribution" style="margin-top: 10px;"></div>
-            </div>
+            <div class="stat-card"><span class="stat-label">Visitas</span><span class="stat-value" id="total-visits">0</span></div>
+            <div class="stat-card"><span class="stat-label">Pagas (Wiapy)</span><span class="stat-value" id="total-paid" style="color: var(--success)">0</span></div>
+            <div class="stat-card"><span class="stat-label">Geradas</span><span class="stat-value" id="total-pending" style="color: var(--gold)">0</span></div>
+            <div class="stat-card"><span class="stat-label">Abandonos</span><span class="stat-value" id="total-abandon" style="color: var(--primary)">0</span></div>
+            <div class="stat-card"><span class="stat-label">ROI Real</span><span class="stat-value" id="roi-rate">0.0%</span></div>
         </div>
 
         <div class="card">
-            <div class="card-title">🧪 Performance de Variantes (A/B)</div>
-            <div class="variant-grid" id="variant-display">
-                <div class="variant-group">
-                    <div class="variant-group-title"><span>Ângulos de Saudação</span> <span id="saudacao-total">0 testes</span></div>
-                    <div id="group-saudacao"></div>
-                </div>
-                <div class="variant-group">
-                    <div class="variant-group-title"><span>Ângulos de Resultado</span> <span id="resultado-total">0 testes</span></div>
-                    <div id="group-resultado"></div>
-                </div>
-                <div class="variant-group">
-                    <div class="variant-group-title"><span>Ângulos de CTA</span> <span id="cta-total">0 testes</span></div>
-                    <div id="group-cta"></div>
-                </div>
-            </div>
+            <div class="card-title">🧪 Performance de Conversão Real (A/B)</div>
+            <table class="variant-table" id="variant-table">
+                <thead>
+                    <tr>
+                        <th>Ângulo de Copy</th>
+                        <th>Testes</th>
+                        <th>Cliques Chk</th>
+                        <th>Gerados</th>
+                        <th style="color: var(--success)">Pagas</th>
+                        <th>Conv. Real</th>
+                    </tr>
+                </thead>
+                <tbody id="variant-body"></tbody>
+            </table>
         </div>
 
         <div class="main-grid">
             <div class="card">
-                <div class="card-title">📂 Histórico Inteligente (7 Dias)</div>
+                <div class="card-title">📂 Histórico de Vendas (7 Dias)</div>
                 <div id="history-list"></div>
             </div>
             <div class="card">
-                <div class="card-title">🔴 Atividade em Tempo Real (Monitor de Usuários)</div>
-                <div class="activity-list" id="activity-list">
-                    <!-- Usuários individuais serão inseridos aqui -->
-                </div>
+                <div class="card-title">🔴 Monitor de Vendas em Tempo Real</div>
+                <div id="activity-list" style="max-height: 500px; overflow-y: auto;"></div>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, onValue, remove, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, onValue, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyCDYmSVU2xVVuLw0vu3svKI7n4hvdxjW0w",
@@ -162,204 +104,71 @@
         const app = initializeApp(firebaseConfig );
         const db = getDatabase(app);
 
-        let hourChart, funnelChart;
-
-        function initCharts() {
-            const ctxH = document.getElementById('hourChart').getContext('2d');
-            hourChart = new Chart(ctxH, {
-                type: 'line',
-                data: { labels: Array.from({length: 24}, (_, i) => i+'h'), datasets: [{ label: 'Visitas', data: new Array(24).fill(0), borderColor: '#ef4444', tension: 0.4, fill: true, backgroundColor: 'rgba(239, 68, 68, 0.1)' }] },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#262626' } }, x: { grid: { display: false } } } }
-            });
-
-            const ctxF = document.getElementById('funnelChart').getContext('2d');
-            funnelChart = new Chart(ctxF, {
-                type: 'bar',
-                data: { 
-                    labels: ['Início', 'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7', 'Fotos', 'Resultado', 'Checkout'], 
-                    datasets: [{ data: new Array(11).fill(0), backgroundColor: (ctx) => ctx.index === 8 ? '#fbbf24' : '#ef4444', borderRadius: 5 }] 
-                },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#262626' } } } }
-            });
-        }
-
         onValue(ref(db, 'sessions'), (snapshot) => {
             const data = snapshot.val() || {};
             const sessions = Object.values(data).sort((a,b) => b.lastUpdate - a.lastUpdate);
-            const today = new Date().toLocaleDateString();
-            const todaySessions = sessions.filter(s => new Date(s.enteredAt).toLocaleDateString() === today);
             
-            document.getElementById('total-visits').innerText = todaySessions.length;
-            const checkouts = todaySessions.filter(s => s.status === 'checkout_clicked').length;
-            document.getElementById('total-checkouts').innerText = checkouts;
-            document.getElementById('conv-rate').innerText = todaySessions.length > 0 ? ((checkouts/todaySessions.length)*100).toFixed(1)+'%' : '0.0%';
-            
-            const now = Date.now();
-            document.getElementById('online-now').innerText = sessions.filter(s => now - s.lastUpdate < 60000).length;
+            // Métricas Globais
+            const paid = sessions.filter(s => s.saleStatus === 'paid').length;
+            const pending = sessions.filter(s => s.saleStatus === 'pending').length;
+            const clicked = sessions.filter(s => s.status === 'checkout_clicked').length;
+            const abandon = clicked - paid - pending;
 
-            const hours = new Array(24).fill(0);
-            todaySessions.forEach(s => { const h = new Date(s.enteredAt).getHours(); hours[h]++; });
-            hourChart.data.datasets[0].data = hours;
-            hourChart.update();
+            document.getElementById('total-visits').innerText = sessions.length;
+            document.getElementById('total-paid').innerText = paid;
+            document.getElementById('total-pending').innerText = pending;
+            document.getElementById('total-abandon').innerText = Math.max(0, abandon);
+            document.getElementById('roi-rate').innerText = sessions.length > 0 ? ((paid/sessions.length)*100).toFixed(1)+'%' : '0.0%';
 
-            const funnelData = new Array(11).fill(0);
-            const ageCounts = { '18-25': 0, '26-35': 0, '36-45': 0, '46-55': 0, '56+': 0 };
-            
-            sessions.forEach(s => {
-                const step = s.currentStep;
-                const status = s.status;
-                if (status === 'checkout_clicked') { for(let i=0; i<=10; i++) funnelData[i]++; }
-                else if (step === 'result') { for(let i=0; i<=9; i++) funnelData[i]++; }
-                else if (step === 'processing') { for(let i=0; i<=8; i++) funnelData[i]++; }
-                else if (typeof step === 'number') { for(let i=0; i<=Math.min(step, 7); i++) funnelData[i]++; }
-
-                if(s.responses && s.responses[0]) {
-                    const age = s.responses[0];
-                    if(ageCounts.hasOwnProperty(age)) ageCounts[age]++;
-                }
-            });
-            funnelChart.data.datasets[0].data = funnelData;
-            funnelChart.update();
-
-            const ageDisplay = document.getElementById('age-distribution');
-            const totalWithAge = Object.values(ageCounts).reduce((a,b) => a+b, 0);
-            ageDisplay.innerHTML = Object.keys(ageCounts).map(age => {
-                const count = ageCounts[age];
-                const perc = totalWithAge > 0 ? (count/totalWithAge*100).toFixed(0) : 0;
-                return `
-                    <div class="age-bar-container">
-                        <div class="age-label"><span>${age} anos</span> <span>${count} (${perc}%)</span></div>
-                        <div class="age-bar-bg"><div class="age-bar-fill" style="width: ${perc}%"></div></div>
-                    </div>
-                `;
-            }).join('');
-
-            // Atividade Real Monitor de Usuários 8.7
+            // Monitor de Usuários
             const activityList = document.getElementById('activity-list');
-            activityList.innerHTML = sessions.slice(0, 30).map((s, idx) => {
-                const isOnline = now - s.lastUpdate < 60000;
-                const isConverted = s.status === 'checkout_clicked';
-                const stepLabel = s.status === 'checkout_clicked' ? '💰 CHECKOUT' : 
-                                 s.currentStep === 'result' ? '✅ RESULTADO' : 
-                                 s.currentStep === 'processing' ? '📸 FOTOS' : 
-                                 '📝 PERGUNTA ' + (typeof s.currentStep === 'number' ? s.currentStep + 1 : '1');
-                
-                const variantIdx = s.variantIdx !== undefined ? s.variantIdx + 1 : '?';
+            activityList.innerHTML = sessions.slice(0, 20).map((s, idx) => {
+                const statusBadge = s.saleStatus === 'paid' ? '<span class="badge-status badge-paid">PAGO</span>' :
+                                   s.saleStatus === 'pending' ? '<span class="badge-status badge-pending">GERADO</span>' :
+                                   s.status === 'checkout_clicked' ? '<span class="badge-status badge-abandon">ABANDONO</span>' :
+                                   '<span class="badge-status">NAVEGANDO</span>';
                 
                 return `
-                    <div class="activity-item ${isOnline ? 'online' : ''} ${isConverted ? 'converted' : ''}">
-                        <div class="activity-top">
-                            <div class="user-tag">
-                                <span class="user-num">USUÁRIO #${sessions.length - idx}</span>
-                                <span>${new Date(s.lastUpdate).toLocaleTimeString()}</span>
-                            </div>
-                            <span class="status-badge ${isOnline ? 'status-online' : 'status-offline'}">
-                                ${isOnline ? '● ONLINE' : 'OFFLINE'}
-                            </span>
+                    <div class="activity-item ${s.saleStatus === 'paid' ? 'paid' : ''}">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="font-weight:900; font-size:11px;">USUÁRIO #${sessions.length - idx}</span>
+                            ${statusBadge}
                         </div>
-                        <div class="activity-details">
-                            <div class="detail-box">
-                                <span class="detail-label">Etapa Atual</span>
-                                <span class="detail-value" style="color: ${isConverted ? 'var(--success)' : 'var(--text)'}">${stepLabel}</span>
-                            </div>
-                            <div class="detail-box">
-                                <span class="detail-label">Ângulos de Copy</span>
-                                <div class="copy-angles">
-                                    <span class="angle-tag">S${variantIdx}</span>
-                                    <span class="angle-tag">R${variantIdx}</span>
-                                    <span class="angle-tag">C${variantIdx}</span>
-                                </div>
-                            </div>
+                        <div style="font-size:10px; color:var(--muted); display:flex; gap:10px;">
+                            <span>Ângulos: S${(s.variantIdx||0)+1} R${(s.variantIdx||0)+1} C${(s.variantIdx||0)+1}</span>
+                            <span>• ${new Date(s.lastUpdate).toLocaleTimeString()}</span>
                         </div>
                     </div>
                 `;
             }).join('');
-
-            // Histórico Inteligente
-            const historyList = document.getElementById('history-list');
-            const historyData = {};
-            sessions.forEach(s => {
-                const date = new Date(s.enteredAt).toLocaleDateString();
-                if(!historyData[date]) historyData[date] = { visits: 0, checkouts: 0, steps: new Array(11).fill(0), hours: new Array(24).fill(0) };
-                historyData[date].visits++;
-                const h = new Date(s.enteredAt).getHours();
-                historyData[date].hours[h]++;
-                if(s.status === 'checkout_clicked') historyData[date].checkouts++;
-                if (s.status === 'checkout_clicked') { for(let i=0; i<=10; i++) historyData[date].steps[i]++; }
-                else if (s.currentStep === 'result') { for(let i=0; i<=9; i++) historyData[date].steps[i]++; }
-                else if (s.currentStep === 'processing') { for(let i=0; i<=8; i++) historyData[date].steps[i]++; }
-                else if (typeof s.currentStep === 'number') { for(let i=0; i<=Math.min(s.currentStep, 7); i++) historyData[date].steps[i]++; }
-            });
-
-            historyList.innerHTML = Object.keys(historyData).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7).map((date, idx) => {
-                const d = historyData[date];
-                const rate = ((d.checkouts/d.visits)*100).toFixed(1);
-                return `
-                <div class="history-item">
-                    <div class="history-header" onclick="const c = this.nextElementSibling; c.style.display = c.style.display === 'block' ? 'none' : 'block'; if(c.style.display === 'block') renderHistoryChart('${date}', ${JSON.stringify(d.hours)}, ${idx})">
-                        <span>📅 ${date}</span>
-                        <span>${d.visits} Visitas | ${d.checkouts} Vendas | ${rate}% ▾</span>
-                    </div>
-                    <div class="history-content">
-                        <div class="history-sub-grid">
-                            <div class="history-mini-card">
-                                <div class="history-mini-label">Fluxo por Hora</div>
-                                <canvas id="historyChart-${idx}" height="120"></canvas>
-                            </div>
-                            <div class="history-mini-card">
-                                <div class="history-mini-label">Funil de Retenção</div>
-                                <div style="font-size: 11px;">
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Início:</span> <span>${d.steps[0]}</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px; color: var(--gold)"><span>Viram Fotos:</span> <span>${d.steps[8]}</span></div>
-                                    <div style="display:flex; justify-content:space-between; color: var(--success); font-weight:900;"><span>Checkout:</span> <span>${d.steps[10]}</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `}).join('');
         });
-
-        window.renderHistoryChart = (date, hourData, idx) => {
-            const ctx = document.getElementById(`historyChart-${idx}`).getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: { labels: Array.from({length: 24}, (_, i) => i+'h'), datasets: [{ data: hourData, backgroundColor: '#ef4444' }] },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
-            });
-        };
 
         onValue(ref(db, 'optimization/variants'), (snapshot) => {
             const data = snapshot.val() || {};
-            let bestOverall = { name: '---', rate: -1 };
+            const tbody = document.getElementById('variant-body');
+            tbody.innerHTML = '';
+
             ['saudacao', 'resultado', 'cta'].forEach(type => {
-                const groupDiv = document.getElementById(`group-${type}`);
-                let totalTests = 0;
-                let bestInGroup = { idx: -1, rate: -1 };
-                let variants = [];
                 for(let i=0; i<5; i++) {
-                    const v = data[`${type}_${i}`] || { tests: 0, converted: 0 };
+                    const v = data[`${type}_${i}`] || { tests: 0, converted: 0, paid: 0, pending: 0 };
                     const tests = v.tests || 0;
-                    const converted = v.converted || 0;
-                    const rate = tests > 0 ? (converted/tests*100) : 0;
-                    totalTests += tests;
-                    if (rate > bestInGroup.rate && tests > 0) bestInGroup = { idx: i, rate: rate };
-                    if (rate > bestOverall.rate && tests > 0) bestOverall = { name: `${type}_${i}`, rate: rate };
-                    variants.push({ idx: i, tests, converted, rate });
+                    const clicks = v.converted || 0;
+                    const paid = v.paid || 0;
+                    const pending = v.pending || 0;
+                    const rate = tests > 0 ? (paid/tests*100).toFixed(1) : 0;
+
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span style="font-weight:900; color:var(--primary)">${type.toUpperCase()} ${i+1}</span></td>
+                            <td>${tests}</td>
+                            <td>${clicks}</td>
+                            <td style="color:var(--gold)">${pending}</td>
+                            <td style="color:var(--success); font-weight:900;">${paid}</td>
+                            <td><strong>${rate}%</strong></td>
+                        </tr>
+                    `;
                 }
-                document.getElementById(`${type}-total`).innerText = `${totalTests} testes`;
-                groupDiv.innerHTML = variants.map(v => `
-                    <div class="variant-row ${v.idx === bestInGroup.idx ? 'winner' : ''}">
-                        <div class="variant-info">
-                            <span class="variant-name">Ângulo ${v.idx + 1} ${v.idx === bestInGroup.idx ? '🏆' : ''}</span>
-                            <span class="variant-stats">${v.tests} testes | ${v.converted} vendas</span>
-                            <span class="variant-rate">${v.rate.toFixed(1)}%</span>
-                        </div>
-                        <div class="progress-bg"><div class="progress-fill" style="width: ${v.rate}%"></div></div>
-                    </div>
-                `).join('');
             });
-            document.getElementById('winner-name').innerText = `${bestOverall.name.toUpperCase()} (${bestOverall.rate.toFixed(1)}%)`;
         });
 
         document.getElementById('reset-btn').onclick = () => {
@@ -369,8 +178,6 @@
                 location.reload();
             }
         };
-
-        initCharts();
     </script>
 </body>
 </html>
