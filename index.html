@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard TRIPE - Analytics Real-time</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #ef4444; --bg: #0a0a0a; --card: #141414; --text: #ffffff; --muted: #9ca3af; --border: #262626; --success: #22c55e; }
         body { font-family: 'Inter', sans-serif; background: var(--bg ); color: var(--text); margin: 0; padding: 20px; }
@@ -116,16 +115,32 @@
 
             const funnelHtml = funnelSteps.map(step => {
                 const count = sessions.filter(s => {
-                    if (step.id === 'processing') return s.currentStep === 'processing' || s.currentStep === 'result' || s.status === 'checkout_clicked';
-                    if (step.id === 'result') return s.currentStep === 'result' || s.status === 'checkout_clicked';
-                    if (step.id === 'checkout_clicked') return s.status === 'checkout_clicked';
+                    const isAtCheckout = s.status === 'checkout_clicked' || s.status === 'converted';
+                    const isAtResult = s.currentStep === 'result' || isAtCheckout;
+                    const isAtProcessing = s.currentStep === 'processing' || isAtResult;
+
+                    if (step.id === 'processing') return isAtProcessing;
+                    if (step.id === 'result') return isAtResult;
+                    if (step.id === 'checkout_clicked') return isAtCheckout;
+                    
                     if (typeof step.id === 'number') {
-                        return s.currentStep >= step.id || s.currentStep === 'processing' || s.currentStep === 'result' || s.status === 'checkout_clicked';
+                        if (typeof s.currentStep === 'number') return s.currentStep >= step.id || isAtProcessing;
+                        return isAtProcessing;
                     }
                     return false;
                 }).length;
+
                 const perc = total > 0 ? (count/total*100).toFixed(0) : 0;
-                return `<div class="funnel-step"><div class="step-info">${step.label}</div><div class="step-bar-bg"><div class="step-bar-fill" style="width: ${perc}%; background: ${step.color || 'var(--primary)'}"></div><div class="step-count">${count}</div></div><div class="step-perc">${perc}%</div></div>`;
+                return `
+                    <div class="funnel-step">
+                        <div class="step-info">${step.label}</div>
+                        <div class="step-bar-bg">
+                            <div class="step-bar-fill" style="width: ${perc}%; background: ${step.color || 'var(--primary)'}"></div>
+                            <div class="step-count">${count}</div>
+                        </div>
+                        <div class="step-perc">${perc}%</div>
+                    </div>
+                `;
             }).join('');
             document.getElementById('funnel-display').innerHTML = funnelHtml;
         });
@@ -148,8 +163,16 @@
             ['saudacao', 'resultado', 'cta'].forEach(type => {
                 for(let i=0; i<5; i++) {
                     const v = data[`${type}_${i}`] || { tests: 0, converted: 0 };
-                    const perc = v.tests > 0 ? (v.converted/v.tests*100).toFixed(1) : 0;
-                    tbody.innerHTML += `<tr><td><span class="badge badge-red">${type} ${i+1}</span></td><td>${v.tests}</td><td>${v.converted}</td><td><strong>${perc}%</strong></td></tr>`;
+                    const tests = v.tests || 0;
+                    const converted = v.converted || 0;
+                    const perc = tests > 0 ? (converted/tests*100).toFixed(1) : 0;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><span class="badge badge-red">${type} ${i+1}</span></td>
+                            <td>${tests}</td>
+                            <td>${converted}</td>
+                            <td><strong>${perc}%</strong></td>
+                        </tr>`;
                 }
             });
         });
