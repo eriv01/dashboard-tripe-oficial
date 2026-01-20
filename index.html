@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligência TRIPE - Dashboard Ultra v8.5</title>
+    <title>Inteligência TRIPE - Dashboard Ultra v8.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -36,12 +36,15 @@
         .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 1s ease; }
         .variant-row.winner .progress-fill { background: var(--success); }
 
-        .history-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
-        .history-header { background: #1a1a1a; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 900; font-size: 13px; }
-        .history-content { padding: 20px; display: none; background: #0f0f0f; border-top: 1px solid var(--border); }
-        .history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .history-stat-box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-
+        /* Estilos do Histórico Ultra Detalhado */
+        .history-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 15px; overflow: hidden; }
+        .history-header { background: #1a1a1a; padding: 18px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 900; font-size: 14px; transition: background 0.2s; border-left: 4px solid var(--primary); }
+        .history-header:hover { background: #262626; }
+        .history-content { padding: 25px; display: none; background: #0f0f0f; border-top: 1px solid var(--border); }
+        .history-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 20px; }
+        .history-mini-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+        .history-mini-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; font-weight: 900; }
+        
         .activity-row { padding: 12px; border-bottom: 1px solid #262626; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
         .user-id { background: #262626; color: var(--muted); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-right: 10px; }
         
@@ -57,7 +60,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.5</span></h1>
+            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.6</span></h1>
             <div style="display: flex; gap: 15px; align-items: center;">
                 <div class="live-tag">LIVE: MONITORANDO</div>
                 <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
@@ -92,9 +95,7 @@
             </div>
             <div class="card">
                 <div class="card-title">👥 Perfil por Idade</div>
-                <div id="age-distribution" style="margin-top: 10px;">
-                    <!-- Faixas de idade serão inseridas aqui -->
-                </div>
+                <div id="age-distribution" style="margin-top: 10px;"></div>
             </div>
         </div>
 
@@ -116,15 +117,14 @@
             </div>
         </div>
 
-        <div class="main-grid">
-            <div class="card">
-                <div class="card-title">📂 Histórico Detalhado (7 Dias)</div>
-                <div id="history-list"></div>
-            </div>
-            <div class="card">
-                <div class="card-title">🔴 Atividade em Tempo Real</div>
-                <div id="activity-list" style="max-height: 400px; overflow-y: auto;"></div>
-            </div>
+        <div class="card">
+            <div class="card-title">📂 Histórico Inteligente (7 Dias)</div>
+            <div id="history-list"></div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">🔴 Atividade em Tempo Real</div>
+            <div id="activity-list" style="max-height: 400px; overflow-y: auto;"></div>
         </div>
     </div>
 
@@ -180,13 +180,11 @@
             const now = Date.now();
             document.getElementById('online-now').innerText = sessions.filter(s => now - s.lastUpdate < 60000).length;
 
-            // Hour Chart
             const hours = new Array(24).fill(0);
             todaySessions.forEach(s => { const h = new Date(s.enteredAt).getHours(); hours[h]++; });
             hourChart.data.datasets[0].data = hours;
             hourChart.update();
 
-            // Funnel Chart
             const funnelData = new Array(11).fill(0);
             const ageCounts = { '18-25': 0, '26-35': 0, '36-45': 0, '46-55': 0, '56+': 0 };
             
@@ -198,7 +196,6 @@
                 else if (step === 'processing') { for(let i=0; i<=8; i++) funnelData[i]++; }
                 else if (typeof step === 'number') { for(let i=0; i<=Math.min(step, 7); i++) funnelData[i]++; }
 
-                // Contagem de Idade (assumindo que a resposta da idade está em s.responses[0])
                 if(s.responses && s.responses[0]) {
                     const age = s.responses[0];
                     if(ageCounts.hasOwnProperty(age)) ageCounts[age]++;
@@ -207,7 +204,6 @@
             funnelChart.data.datasets[0].data = funnelData;
             funnelChart.update();
 
-            // Age Distribution
             const ageDisplay = document.getElementById('age-distribution');
             const totalWithAge = Object.values(ageCounts).reduce((a,b) => a+b, 0);
             ageDisplay.innerHTML = Object.keys(ageCounts).map(age => {
@@ -221,7 +217,6 @@
                 `;
             }).join('');
 
-            // Activity List Numerada
             const activityList = document.getElementById('activity-list');
             activityList.innerHTML = sessions.slice(0, 20).map((s, idx) => `
                 <div class="activity-row">
@@ -233,13 +228,15 @@
                 </div>
             `).join('');
 
-            // History 7 Days
+            // Histórico Inteligente 8.6
             const historyList = document.getElementById('history-list');
             const historyData = {};
             sessions.forEach(s => {
                 const date = new Date(s.enteredAt).toLocaleDateString();
-                if(!historyData[date]) historyData[date] = { visits: 0, checkouts: 0, steps: new Array(11).fill(0) };
+                if(!historyData[date]) historyData[date] = { visits: 0, checkouts: 0, steps: new Array(11).fill(0), hours: new Array(24).fill(0) };
                 historyData[date].visits++;
+                const h = new Date(s.enteredAt).getHours();
+                historyData[date].hours[h]++;
                 if(s.status === 'checkout_clicked') historyData[date].checkouts++;
                 if (s.status === 'checkout_clicked') { for(let i=0; i<=10; i++) historyData[date].steps[i]++; }
                 else if (s.currentStep === 'result') { for(let i=0; i<=9; i++) historyData[date].steps[i]++; }
@@ -247,33 +244,49 @@
                 else if (typeof s.currentStep === 'number') { for(let i=0; i<=Math.min(s.currentStep, 7); i++) historyData[date].steps[i]++; }
             });
 
-            historyList.innerHTML = Object.keys(historyData).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7).map(date => {
+            historyList.innerHTML = Object.keys(historyData).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7).map((date, idx) => {
                 const d = historyData[date];
                 const rate = ((d.checkouts/d.visits)*100).toFixed(1);
                 return `
                 <div class="history-item">
-                    <div class="history-header" onclick="const c = this.nextElementSibling; c.style.display = c.style.display === 'block' ? 'none' : 'block'">
+                    <div class="history-header" onclick="const c = this.nextElementSibling; c.style.display = c.style.display === 'block' ? 'none' : 'block'; if(c.style.display === 'block') renderHistoryChart('${date}', ${JSON.stringify(d.hours)}, ${idx})">
                         <span>📅 ${date}</span>
                         <span>${d.visits} Visitas | ${d.checkouts} Vendas | ${rate}% ▾</span>
                     </div>
                     <div class="history-content">
-                        <div class="history-grid">
-                            <div class="history-stat-box">
-                                <div style="font-size: 11px; margin-top: 10px;">
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Início:</span> <span>${d.steps[0]}</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; color: var(--gold)"><span>Viram Fotos:</span> <span>${d.steps[8]}</span></div>
-                                    <div style="display:flex; justify-content:space-between; color: var(--success)"><span>Checkout:</span> <span>${d.steps[10]}</span></div>
+                        <div class="history-sub-grid">
+                            <div class="history-mini-card">
+                                <div class="history-mini-label">Fluxo por Hora</div>
+                                <canvas id="historyChart-${idx}" height="120"></canvas>
+                            </div>
+                            <div class="history-mini-card">
+                                <div class="history-mini-label">Funil de Retenção</div>
+                                <div style="font-size: 11px;">
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Início:</span> <span>${d.steps[0]}</span></div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>P7:</span> <span>${d.steps[7]}</span></div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px; color: var(--gold)"><span>Viram Fotos:</span> <span>${d.steps[8]}</span></div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Resultado:</span> <span>${d.steps[9]}</span></div>
+                                    <div style="display:flex; justify-content:space-between; color: var(--success); font-weight:900;"><span>Checkout:</span> <span>${d.steps[10]}</span></div>
                                 </div>
                             </div>
-                            <div class="history-stat-box" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
-                                <div style="font-size: 24px; font-weight: 900; color: var(--success)">${rate}%</div>
-                                <div style="font-size: 10px; color: var(--muted)">CONVERSÃO</div>
-                            </div>
+                        </div>
+                        <div class="history-mini-card" style="text-align:center;">
+                            <div class="history-mini-label">Performance Geral do Dia</div>
+                            <div style="font-size: 28px; font-weight: 900; color: var(--success)">${rate}% de Conversão</div>
                         </div>
                     </div>
                 </div>
             `}).join('');
         });
+
+        window.renderHistoryChart = (date, hourData, idx) => {
+            const ctx = document.getElementById(`historyChart-${idx}`).getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: { labels: Array.from({length: 24}, (_, i) => i+'h'), datasets: [{ data: hourData, backgroundColor: '#ef4444' }] },
+                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
+            });
+        };
 
         onValue(ref(db, 'optimization/variants'), (snapshot) => {
             const data = snapshot.val() || {};
