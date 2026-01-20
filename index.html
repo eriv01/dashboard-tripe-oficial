@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligência TRIPE - Dashboard Ultra v8.4</title>
+    <title>Inteligência TRIPE - Dashboard Ultra v8.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #ef4444; --bg: #0a0a0a; --card: #141414; --text: #ffffff; --muted: #9ca3af; --border: #262626; --success: #22c55e; --gold: #fbbf24; }
+        :root { --primary: #ef4444; --bg: #0a0a0a; --card: #141414; --text: #ffffff; --muted: #9ca3af; --border: #262626; --success: #22c55e; --gold: #fbbf24; --blue: #3b82f6; }
         body { font-family: 'Inter', sans-serif; background: var(--bg ); color: var(--text); margin: 0; padding: 20px; overflow-x: hidden; }
         .container { max-width: 1200px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
@@ -36,15 +36,19 @@
         .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 1s ease; }
         .variant-row.winner .progress-fill { background: var(--success); }
 
-        /* Estilos do Histórico Detalhado */
         .history-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
-        .history-header { background: #1a1a1a; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 900; font-size: 13px; transition: background 0.2s; }
-        .history-header:hover { background: #262626; }
+        .history-header { background: #1a1a1a; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 900; font-size: 13px; }
         .history-content { padding: 20px; display: none; background: #0f0f0f; border-top: 1px solid var(--border); }
         .history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
         .history-stat-box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-        .history-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
-        .history-stat-value { font-size: 18px; font-weight: 900; }
+
+        .activity-row { padding: 12px; border-bottom: 1px solid #262626; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .user-id { background: #262626; color: var(--muted); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-right: 10px; }
+        
+        .age-bar-container { margin-bottom: 15px; }
+        .age-label { font-size: 11px; font-weight: 700; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .age-bar-bg { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+        .age-bar-fill { height: 100%; background: var(--blue); border-radius: 4px; transition: width 1s ease; }
 
         .live-tag { background: var(--success); color: black; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 900; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
@@ -53,7 +57,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.4</span></h1>
+            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.5</span></h1>
             <div style="display: flex; gap: 15px; align-items: center;">
                 <div class="live-tag">LIVE: MONITORANDO</div>
                 <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
@@ -87,8 +91,10 @@
                 <canvas id="funnelChart" height="200"></canvas>
             </div>
             <div class="card">
-                <div class="card-title">⏱️ Índice de Fricção (Tempo)</div>
-                <canvas id="frictionChart" height="200"></canvas>
+                <div class="card-title">👥 Perfil por Idade</div>
+                <div id="age-distribution" style="margin-top: 10px;">
+                    <!-- Faixas de idade serão inseridas aqui -->
+                </div>
             </div>
         </div>
 
@@ -110,14 +116,15 @@
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-title">📂 Histórico Detalhado (7 Dias)</div>
-            <div id="history-list"></div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">🔴 Atividade em Tempo Real</div>
-            <div id="activity-list" style="max-height: 300px; overflow-y: auto;"></div>
+        <div class="main-grid">
+            <div class="card">
+                <div class="card-title">📂 Histórico Detalhado (7 Dias)</div>
+                <div id="history-list"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">🔴 Atividade em Tempo Real</div>
+                <div id="activity-list" style="max-height: 400px; overflow-y: auto;"></div>
+            </div>
         </div>
     </div>
 
@@ -138,7 +145,7 @@
         const app = initializeApp(firebaseConfig );
         const db = getDatabase(app);
 
-        let hourChart, funnelChart, frictionChart;
+        let hourChart, funnelChart;
 
         function initCharts() {
             const ctxH = document.getElementById('hourChart').getContext('2d');
@@ -157,13 +164,6 @@
                 },
                 options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#262626' } } } }
             });
-
-            const ctxFr = document.getElementById('frictionChart').getContext('2d');
-            frictionChart = new Chart(ctxFr, {
-                type: 'line',
-                data: { labels: ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7'], datasets: [{ label: 'Segundos', data: new Array(7).fill(0), borderColor: '#ffffff', borderDash: [5, 5], tension: 0 }] },
-                options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#262626' } } } }
-            });
         }
 
         onValue(ref(db, 'sessions'), (snapshot) => {
@@ -180,12 +180,16 @@
             const now = Date.now();
             document.getElementById('online-now').innerText = sessions.filter(s => now - s.lastUpdate < 60000).length;
 
+            // Hour Chart
             const hours = new Array(24).fill(0);
             todaySessions.forEach(s => { const h = new Date(s.enteredAt).getHours(); hours[h]++; });
             hourChart.data.datasets[0].data = hours;
             hourChart.update();
 
+            // Funnel Chart
             const funnelData = new Array(11).fill(0);
+            const ageCounts = { '18-25': 0, '26-35': 0, '36-45': 0, '46-55': 0, '56+': 0 };
+            
             sessions.forEach(s => {
                 const step = s.currentStep;
                 const status = s.status;
@@ -193,19 +197,43 @@
                 else if (step === 'result') { for(let i=0; i<=9; i++) funnelData[i]++; }
                 else if (step === 'processing') { for(let i=0; i<=8; i++) funnelData[i]++; }
                 else if (typeof step === 'number') { for(let i=0; i<=Math.min(step, 7); i++) funnelData[i]++; }
+
+                // Contagem de Idade (assumindo que a resposta da idade está em s.responses[0])
+                if(s.responses && s.responses[0]) {
+                    const age = s.responses[0];
+                    if(ageCounts.hasOwnProperty(age)) ageCounts[age]++;
+                }
             });
             funnelChart.data.datasets[0].data = funnelData;
             funnelChart.update();
 
+            // Age Distribution
+            const ageDisplay = document.getElementById('age-distribution');
+            const totalWithAge = Object.values(ageCounts).reduce((a,b) => a+b, 0);
+            ageDisplay.innerHTML = Object.keys(ageCounts).map(age => {
+                const count = ageCounts[age];
+                const perc = totalWithAge > 0 ? (count/totalWithAge*100).toFixed(0) : 0;
+                return `
+                    <div class="age-bar-container">
+                        <div class="age-label"><span>${age} anos</span> <span>${count} (${perc}%)</span></div>
+                        <div class="age-bar-bg"><div class="age-bar-fill" style="width: ${perc}%"></div></div>
+                    </div>
+                `;
+            }).join('');
+
+            // Activity List Numerada
             const activityList = document.getElementById('activity-list');
-            activityList.innerHTML = sessions.slice(0, 15).map(s => `
-                <div style="padding: 12px; border-bottom: 1px solid #262626; display: flex; justify-content: space-between; font-size: 13px;">
-                    <span>${s.currentStep === 'result' ? '✅ Resultado' : s.currentStep === 'processing' ? '📸 Fotos' : '📝 Pergunta '+s.currentStep}</span>
+            activityList.innerHTML = sessions.slice(0, 20).map((s, idx) => `
+                <div class="activity-row">
+                    <div style="display:flex; align-items:center;">
+                        <span class="user-id">#${sessions.length - idx}</span>
+                        <span>${s.currentStep === 'result' ? '✅ Resultado' : s.currentStep === 'processing' ? '📸 Fotos' : '📝 Pergunta '+s.currentStep}</span>
+                    </div>
                     <span style="color: var(--muted)">${new Date(s.lastUpdate).toLocaleTimeString()}</span>
                 </div>
             `).join('');
 
-            // Histórico Detalhado
+            // History 7 Days
             const historyList = document.getElementById('history-list');
             const historyData = {};
             sessions.forEach(s => {
@@ -213,8 +241,6 @@
                 if(!historyData[date]) historyData[date] = { visits: 0, checkouts: 0, steps: new Array(11).fill(0) };
                 historyData[date].visits++;
                 if(s.status === 'checkout_clicked') historyData[date].checkouts++;
-                
-                // Funil do dia
                 if (s.status === 'checkout_clicked') { for(let i=0; i<=10; i++) historyData[date].steps[i]++; }
                 else if (s.currentStep === 'result') { for(let i=0; i<=9; i++) historyData[date].steps[i]++; }
                 else if (s.currentStep === 'processing') { for(let i=0; i<=8; i++) historyData[date].steps[i]++; }
@@ -233,37 +259,20 @@
                     <div class="history-content">
                         <div class="history-grid">
                             <div class="history-stat-box">
-                                <div class="history-stat-label">Conversão por Etapa</div>
                                 <div style="font-size: 11px; margin-top: 10px;">
                                     <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Início:</span> <span>${d.steps[0]}</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Última Pergunta:</span> <span>${d.steps[7]}</span></div>
                                     <div style="display:flex; justify-content:space-between; margin-bottom:5px; color: var(--gold)"><span>Viram Fotos:</span> <span>${d.steps[8]}</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Resultado:</span> <span>${d.steps[9]}</span></div>
                                     <div style="display:flex; justify-content:space-between; color: var(--success)"><span>Checkout:</span> <span>${d.steps[10]}</span></div>
                                 </div>
                             </div>
-                            <div class="history-stat-box">
-                                <div class="history-stat-label">Resumo do Dia</div>
-                                <div style="text-align: center; margin-top: 15px;">
-                                    <div style="font-size: 24px; font-weight: 900; color: var(--success)">${rate}%</div>
-                                    <div style="font-size: 10px; color: var(--muted)">TAXA DE CONVERSÃO</div>
-                                </div>
+                            <div class="history-stat-box" style="text-align:center; display:flex; flex-direction:column; justify-content:center;">
+                                <div style="font-size: 24px; font-weight: 900; color: var(--success)">${rate}%</div>
+                                <div style="font-size: 10px; color: var(--muted)">CONVERSÃO</div>
                             </div>
                         </div>
                     </div>
                 </div>
             `}).join('');
-        });
-
-        onValue(ref(db, 'optimization/metrics/hesitation'), (snapshot) => {
-            const data = snapshot.val() || {};
-            const averages = [];
-            for(let i=0; i<7; i++) {
-                const times = Object.values(data[i] || {});
-                averages.push(times.length > 0 ? (times.reduce((a,b)=>a+b,0)/times.length/1000).toFixed(2) : 0);
-            }
-            frictionChart.data.datasets[0].data = averages;
-            frictionChart.update();
         });
 
         onValue(ref(db, 'optimization/variants'), (snapshot) => {
@@ -292,9 +301,7 @@
                             <span class="variant-stats">${v.tests} testes | ${v.converted} vendas</span>
                             <span class="variant-rate">${v.rate.toFixed(1)}%</span>
                         </div>
-                        <div class="progress-bg">
-                            <div class="progress-fill" style="width: ${v.rate}%"></div>
-                        </div>
+                        <div class="progress-bg"><div class="progress-fill" style="width: ${v.rate}%"></div></div>
                     </div>
                 `).join('');
             });
