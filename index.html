@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligência TRIPE - Dashboard Ultra v8.6</title>
+    <title>Inteligência TRIPE - Dashboard Ultra v8.7</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -22,6 +22,24 @@
         .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; margin-bottom: 20px; }
         .card-title { font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
         
+        /* Atividade Real Estilizada */
+        .activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; padding-right: 5px; }
+        .activity-item { background: #0f0f0f; border: 1px solid var(--border); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; transition: all 0.3s; }
+        .activity-item.online { border-left: 4px solid var(--success); }
+        .activity-item.converted { border-color: var(--success); background: rgba(34, 197, 94, 0.05); }
+        .activity-top { display: flex; justify-content: space-between; align-items: center; }
+        .user-tag { font-weight: 900; font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .user-num { background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+        .status-badge { font-size: 10px; font-weight: 900; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; }
+        .status-online { background: rgba(34, 197, 94, 0.1); color: var(--success); }
+        .status-offline { background: rgba(156, 163, 175, 0.1); color: var(--muted); }
+        .activity-details { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 11px; }
+        .detail-box { background: #1a1a1a; padding: 8px; border-radius: 6px; border: 1px solid var(--border); }
+        .detail-label { color: var(--muted); font-size: 9px; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .detail-value { font-weight: 700; color: var(--text); }
+        .copy-angles { display: flex; gap: 5px; margin-top: 5px; }
+        .angle-tag { font-size: 9px; background: #262626; padding: 2px 6px; border-radius: 3px; color: var(--muted); border: 1px solid var(--border); }
+
         .variant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .variant-group { background: #0f0f0f; border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
         .variant-group-title { font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; }
@@ -36,7 +54,6 @@
         .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 1s ease; }
         .variant-row.winner .progress-fill { background: var(--success); }
 
-        /* Estilos do Histórico Ultra Detalhado */
         .history-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 15px; overflow: hidden; }
         .history-header { background: #1a1a1a; padding: 18px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 900; font-size: 14px; transition: background 0.2s; border-left: 4px solid var(--primary); }
         .history-header:hover { background: #262626; }
@@ -44,9 +61,6 @@
         .history-sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-bottom: 20px; }
         .history-mini-card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
         .history-mini-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; font-weight: 900; }
-        
-        .activity-row { padding: 12px; border-bottom: 1px solid #262626; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
-        .user-id { background: #262626; color: var(--muted); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; margin-right: 10px; }
         
         .age-bar-container { margin-bottom: 15px; }
         .age-label { font-size: 11px; font-weight: 700; margin-bottom: 5px; display: flex; justify-content: space-between; }
@@ -60,7 +74,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.6</span></h1>
+            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.7</span></h1>
             <div style="display: flex; gap: 15px; align-items: center;">
                 <div class="live-tag">LIVE: MONITORANDO</div>
                 <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
@@ -117,14 +131,17 @@
             </div>
         </div>
 
-        <div class="card">
-            <div class="card-title">📂 Histórico Inteligente (7 Dias)</div>
-            <div id="history-list"></div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">🔴 Atividade em Tempo Real</div>
-            <div id="activity-list" style="max-height: 400px; overflow-y: auto;"></div>
+        <div class="main-grid">
+            <div class="card">
+                <div class="card-title">📂 Histórico Inteligente (7 Dias)</div>
+                <div id="history-list"></div>
+            </div>
+            <div class="card">
+                <div class="card-title">🔴 Atividade em Tempo Real (Monitor de Usuários)</div>
+                <div class="activity-list" id="activity-list">
+                    <!-- Usuários individuais serão inseridos aqui -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -217,18 +234,48 @@
                 `;
             }).join('');
 
+            // Atividade Real Monitor de Usuários 8.7
             const activityList = document.getElementById('activity-list');
-            activityList.innerHTML = sessions.slice(0, 20).map((s, idx) => `
-                <div class="activity-row">
-                    <div style="display:flex; align-items:center;">
-                        <span class="user-id">#${sessions.length - idx}</span>
-                        <span>${s.currentStep === 'result' ? '✅ Resultado' : s.currentStep === 'processing' ? '📸 Fotos' : '📝 Pergunta '+s.currentStep}</span>
+            activityList.innerHTML = sessions.slice(0, 30).map((s, idx) => {
+                const isOnline = now - s.lastUpdate < 60000;
+                const isConverted = s.status === 'checkout_clicked';
+                const stepLabel = s.status === 'checkout_clicked' ? '💰 CHECKOUT' : 
+                                 s.currentStep === 'result' ? '✅ RESULTADO' : 
+                                 s.currentStep === 'processing' ? '📸 FOTOS' : 
+                                 '📝 PERGUNTA ' + (typeof s.currentStep === 'number' ? s.currentStep + 1 : '1');
+                
+                const variantIdx = s.variantIdx !== undefined ? s.variantIdx + 1 : '?';
+                
+                return `
+                    <div class="activity-item ${isOnline ? 'online' : ''} ${isConverted ? 'converted' : ''}">
+                        <div class="activity-top">
+                            <div class="user-tag">
+                                <span class="user-num">USUÁRIO #${sessions.length - idx}</span>
+                                <span>${new Date(s.lastUpdate).toLocaleTimeString()}</span>
+                            </div>
+                            <span class="status-badge ${isOnline ? 'status-online' : 'status-offline'}">
+                                ${isOnline ? '● ONLINE' : 'OFFLINE'}
+                            </span>
+                        </div>
+                        <div class="activity-details">
+                            <div class="detail-box">
+                                <span class="detail-label">Etapa Atual</span>
+                                <span class="detail-value" style="color: ${isConverted ? 'var(--success)' : 'var(--text)'}">${stepLabel}</span>
+                            </div>
+                            <div class="detail-box">
+                                <span class="detail-label">Ângulos de Copy</span>
+                                <div class="copy-angles">
+                                    <span class="angle-tag">S${variantIdx}</span>
+                                    <span class="angle-tag">R${variantIdx}</span>
+                                    <span class="angle-tag">C${variantIdx}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span style="color: var(--muted)">${new Date(s.lastUpdate).toLocaleTimeString()}</span>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
-            // Histórico Inteligente 8.6
+            // Histórico Inteligente
             const historyList = document.getElementById('history-list');
             const historyData = {};
             sessions.forEach(s => {
@@ -263,16 +310,10 @@
                                 <div class="history-mini-label">Funil de Retenção</div>
                                 <div style="font-size: 11px;">
                                     <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Início:</span> <span>${d.steps[0]}</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>P7:</span> <span>${d.steps[7]}</span></div>
                                     <div style="display:flex; justify-content:space-between; margin-bottom:6px; color: var(--gold)"><span>Viram Fotos:</span> <span>${d.steps[8]}</span></div>
-                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span>Resultado:</span> <span>${d.steps[9]}</span></div>
                                     <div style="display:flex; justify-content:space-between; color: var(--success); font-weight:900;"><span>Checkout:</span> <span>${d.steps[10]}</span></div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="history-mini-card" style="text-align:center;">
-                            <div class="history-mini-label">Performance Geral do Dia</div>
-                            <div style="font-size: 28px; font-weight: 900; color: var(--success)">${rate}% de Conversão</div>
                         </div>
                     </div>
                 </div>
