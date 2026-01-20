@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligência TRIPE - Dashboard Ultra v8.3</title>
+    <title>Inteligência TRIPE - Dashboard Ultra v8.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -22,7 +22,6 @@
         .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; margin-bottom: 20px; }
         .card-title { font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
         
-        /* Estilos da Nova Tabela de Variantes */
         .variant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .variant-group { background: #0f0f0f; border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
         .variant-group-title { font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; }
@@ -37,9 +36,16 @@
         .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 1s ease; }
         .variant-row.winner .progress-fill { background: var(--success); }
 
+        /* Estilos do Histórico Detalhado */
         .history-item { border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
-        .history-header { background: #1a1a1a; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 600; font-size: 13px; }
-        .history-content { padding: 15px; display: none; background: #0f0f0f; }
+        .history-header { background: #1a1a1a; padding: 15px; cursor: pointer; display: flex; justify-content: space-between; font-weight: 900; font-size: 13px; transition: background 0.2s; }
+        .history-header:hover { background: #262626; }
+        .history-content { padding: 20px; display: none; background: #0f0f0f; border-top: 1px solid var(--border); }
+        .history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .history-stat-box { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
+        .history-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; margin-bottom: 5px; }
+        .history-stat-value { font-size: 18px; font-weight: 900; }
+
         .live-tag { background: var(--success); color: black; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 900; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
@@ -47,7 +53,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.3</span></h1>
+            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v8.4</span></h1>
             <div style="display: flex; gap: 15px; align-items: center;">
                 <div class="live-tag">LIVE: MONITORANDO</div>
                 <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
@@ -89,17 +95,14 @@
         <div class="card">
             <div class="card-title">🧪 Performance de Variantes (A/B)</div>
             <div class="variant-grid" id="variant-display">
-                <!-- Saudação -->
                 <div class="variant-group">
                     <div class="variant-group-title"><span>Ângulos de Saudação</span> <span id="saudacao-total">0 testes</span></div>
                     <div id="group-saudacao"></div>
                 </div>
-                <!-- Resultado -->
                 <div class="variant-group">
                     <div class="variant-group-title"><span>Ângulos de Resultado</span> <span id="resultado-total">0 testes</span></div>
                     <div id="group-resultado"></div>
                 </div>
-                <!-- CTA -->
                 <div class="variant-group">
                     <div class="variant-group-title"><span>Ângulos de CTA</span> <span id="cta-total">0 testes</span></div>
                     <div id="group-cta"></div>
@@ -108,7 +111,7 @@
         </div>
 
         <div class="card">
-            <div class="card-title">📂 Histórico de Performance (7 Dias)</div>
+            <div class="card-title">📂 Histórico Detalhado (7 Dias)</div>
             <div id="history-list"></div>
         </div>
 
@@ -202,23 +205,54 @@
                 </div>
             `).join('');
 
+            // Histórico Detalhado
             const historyList = document.getElementById('history-list');
             const historyData = {};
             sessions.forEach(s => {
                 const date = new Date(s.enteredAt).toLocaleDateString();
-                if(!historyData[date]) historyData[date] = { visits: 0, checkouts: 0 };
+                if(!historyData[date]) historyData[date] = { visits: 0, checkouts: 0, steps: new Array(11).fill(0) };
                 historyData[date].visits++;
                 if(s.status === 'checkout_clicked') historyData[date].checkouts++;
+                
+                // Funil do dia
+                if (s.status === 'checkout_clicked') { for(let i=0; i<=10; i++) historyData[date].steps[i]++; }
+                else if (s.currentStep === 'result') { for(let i=0; i<=9; i++) historyData[date].steps[i]++; }
+                else if (s.currentStep === 'processing') { for(let i=0; i<=8; i++) historyData[date].steps[i]++; }
+                else if (typeof s.currentStep === 'number') { for(let i=0; i<=Math.min(s.currentStep, 7); i++) historyData[date].steps[i]++; }
             });
-            historyList.innerHTML = Object.keys(historyData).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7).map(date => `
+
+            historyList.innerHTML = Object.keys(historyData).sort((a,b) => new Date(b) - new Date(a)).slice(0, 7).map(date => {
+                const d = historyData[date];
+                const rate = ((d.checkouts/d.visits)*100).toFixed(1);
+                return `
                 <div class="history-item">
-                    <div class="history-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">
+                    <div class="history-header" onclick="const c = this.nextElementSibling; c.style.display = c.style.display === 'block' ? 'none' : 'block'">
                         <span>📅 ${date}</span>
-                        <span>${historyData[date].visits} Visitas | ${historyData[date].checkouts} Checkouts | ${(historyData[date].checkouts/historyData[date].visits*100).toFixed(1)}% ▾</span>
+                        <span>${d.visits} Visitas | ${d.checkouts} Vendas | ${rate}% ▾</span>
                     </div>
-                    <div class="history-content">Dados detalhados do dia ${date} disponíveis no Firebase.</div>
+                    <div class="history-content">
+                        <div class="history-grid">
+                            <div class="history-stat-box">
+                                <div class="history-stat-label">Conversão por Etapa</div>
+                                <div style="font-size: 11px; margin-top: 10px;">
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Início:</span> <span>${d.steps[0]}</span></div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Última Pergunta:</span> <span>${d.steps[7]}</span></div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px; color: var(--gold)"><span>Viram Fotos:</span> <span>${d.steps[8]}</span></div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Resultado:</span> <span>${d.steps[9]}</span></div>
+                                    <div style="display:flex; justify-content:space-between; color: var(--success)"><span>Checkout:</span> <span>${d.steps[10]}</span></div>
+                                </div>
+                            </div>
+                            <div class="history-stat-box">
+                                <div class="history-stat-label">Resumo do Dia</div>
+                                <div style="text-align: center; margin-top: 15px;">
+                                    <div style="font-size: 24px; font-weight: 900; color: var(--success)">${rate}%</div>
+                                    <div style="font-size: 10px; color: var(--muted)">TAXA DE CONVERSÃO</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            `).join('');
+            `}).join('');
         });
 
         onValue(ref(db, 'optimization/metrics/hesitation'), (snapshot) => {
@@ -235,13 +269,11 @@
         onValue(ref(db, 'optimization/variants'), (snapshot) => {
             const data = snapshot.val() || {};
             let bestOverall = { name: '---', rate: -1 };
-
             ['saudacao', 'resultado', 'cta'].forEach(type => {
                 const groupDiv = document.getElementById(`group-${type}`);
                 let totalTests = 0;
                 let bestInGroup = { idx: -1, rate: -1 };
                 let variants = [];
-
                 for(let i=0; i<5; i++) {
                     const v = data[`${type}_${i}`] || { tests: 0, converted: 0 };
                     const tests = v.tests || 0;
@@ -252,7 +284,6 @@
                     if (rate > bestOverall.rate && tests > 0) bestOverall = { name: `${type}_${i}`, rate: rate };
                     variants.push({ idx: i, tests, converted, rate });
                 }
-
                 document.getElementById(`${type}-total`).innerText = `${totalTests} testes`;
                 groupDiv.innerHTML = variants.map(v => `
                     <div class="variant-row ${v.idx === bestInGroup.idx ? 'winner' : ''}">
