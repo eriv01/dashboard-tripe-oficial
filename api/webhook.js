@@ -1,8 +1,12 @@
 import admin from 'firebase-admin';
+import fs from 'fs';
+import path from 'path';
 
 if (!admin.apps.length) {
-  // Agora ele procura na mesma pasta, sem o ../
-  import serviceAccount from './serviceAccountKey.json' assert { type: 'json' };
+  // Forma garantida de ler o arquivo na Vercel
+  const keyPath = path.join(process.cwd(), 'api', 'serviceAccountKey.json');
+  const serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
+  
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://projeto-tripe-oficial-default-rtdb.firebaseio.com"
@@ -31,6 +35,7 @@ export default async function handler(req, res) {
 
     return res.status(200).send('Sucesso');
   } catch (e) {
+    console.error(e);
     return res.status(500).send(e.message);
   }
 }
