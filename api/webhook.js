@@ -1,8 +1,8 @@
-const admin = require('firebase-admin');
+import admin from 'firebase-admin';
 
 if (!admin.apps.length) {
-  // O ../ faz o código sair da pasta api e achar a chave na pasta principal
-  const serviceAccount = require("../serviceAccountKey.json");
+  // Agora ele procura na mesma pasta, sem o ../
+  import serviceAccount from './serviceAccountKey.json' assert { type: 'json' };
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://projeto-tripe-oficial-default-rtdb.firebaseio.com"
@@ -12,35 +12,25 @@ if (!admin.apps.length) {
 const db = admin.database();
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).send('Método não permitido');
-  }
+  if (req.method !== 'POST') return res.status(405).send('Erro');
 
   try {
     const data = req.body;
     const sessionId = data.external_id;
-    const statusWiapy = data.status; 
-    const valor = data.value;
+    if (!sessionId) return res.status(200).send("Sem ID");
 
-    if (!sessionId) {
-      return res.status(200).send("OK, mas sem ID");
-    }
-
-    // Mapeamento para o seu Dashboard v9.0 Compatível
     let novoStatus = 'checkout_clicked';
-    if (statusWiapy === 'approved') novoStatus = 'paid';
-    if (statusWiapy === 'pending') novoStatus = 'waiting_payment';
+    if (data.status === 'approved') novoStatus = 'paid';
+    if (data.status === 'pending') novoStatus = 'waiting_payment';
 
-    const sessionRef = db.ref(`sessions/${sessionId}`);
-    await sessionRef.update({
+    await db.ref(`sessions/${sessionId}`).update({
       status: novoStatus,
-      payment_status: statusWiapy,
-      amount: valor,
+      payment_status: data.status,
       last_webhook_update: Date.now()
     });
 
     return res.status(200).send('Sucesso');
-  } catch (error) {
-    return res.status(500).send("Erro interno");
+  } catch (e) {
+    return res.status(500).send(e.message);
   }
 }
