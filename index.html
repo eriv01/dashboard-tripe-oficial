@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligência TRIPE - Dashboard Ultra v9.0 (FULL ANALYTICS)</title>
+    <title>Inteligência TRIPE - Dashboard Ultra v9.0 (COMPATÍVEL)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -19,13 +19,11 @@
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; position: relative; overflow: hidden; }
         .stat-label { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .stat-value { font-size: 24px; font-weight: 900; display: block; }
-        .stat-trend { font-size: 10px; font-weight: 700; margin-top: 5px; }
 
         .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
         .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; margin-bottom: 20px; }
         .card-title { font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
         
-        /* Performance de Variantes Visual */
         .variant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         .variant-group { background: #0f0f0f; border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
         .variant-group-title { font-size: 12px; font-weight: 900; color: var(--muted); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 10px; display: flex; justify-content: space-between; }
@@ -40,7 +38,6 @@
         .progress-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 1s ease; }
         .variant-row.winner .progress-fill { background: var(--success); }
 
-        /* Monitor de Usuários */
         .activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; }
         .activity-item { background: #0f0f0f; border: 1px solid var(--border); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
         .activity-item.online { border-left: 4px solid var(--success); }
@@ -60,7 +57,7 @@
         <div class="header">
             <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v9.0</span></h1>
             <div style="display: flex; gap: 15px; align-items: center;">
-                <div class="live-tag">FULL ANALYTICS ACTIVE</div>
+                <div class="live-tag">WEBHOOK COMPATIBLE</div>
                 <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
             </div>
         </div>
@@ -131,7 +128,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const TICKET_VALUE = 147; // Altere para o valor real do seu produto
+        const TICKET_VALUE = 147; 
 
         let hourChart, funnelChart;
 
@@ -159,9 +156,10 @@
             const sessions = Object.values(data).sort((a,b) => b.lastUpdate - a.lastUpdate);
             const now = Date.now();
             
-            // Stats
-            const paid = sessions.filter(s => s.saleStatus === 'paid').length;
-            const pending = sessions.filter(s => s.saleStatus === 'pending').length;
+            // Stats - AJUSTADO PARA O WEBHOOK DO USUÁRIO
+            const paid = sessions.filter(s => s.status === 'paid').length;
+            const pending = sessions.filter(s => s.status === 'waiting_payment').length;
+            
             document.getElementById('total-visits').innerText = sessions.length;
             document.getElementById('total-paid').innerText = paid;
             document.getElementById('total-revenue').innerText = 'R$ ' + (paid * TICKET_VALUE).toLocaleString('pt-BR');
@@ -182,23 +180,23 @@
                 if (s.currentStep >= 1) funnelData[1]++;
                 if (s.currentStep >= 4) funnelData[2]++;
                 if (s.currentStep >= 7) funnelData[3]++;
-                if (s.currentStep === 'result' || s.status === 'checkout_clicked') funnelData[4]++;
-                if (s.saleStatus === 'paid') funnelData[5]++;
+                if (s.currentStep === 'result' || s.status === 'checkout_clicked' || s.status === 'paid' || s.status === 'waiting_payment') funnelData[4]++;
+                if (s.status === 'paid') funnelData[5]++;
             });
             funnelChart.data.datasets[0].data = funnelData;
             funnelChart.update();
 
-            // Monitor de Usuários
+            // Monitor de Usuários - AJUSTADO PARA O WEBHOOK DO USUÁRIO
             const activityList = document.getElementById('activity-list');
             activityList.innerHTML = sessions.slice(0, 20).map((s, idx) => {
                 const isOnline = now - s.lastUpdate < 60000;
-                const statusBadge = s.saleStatus === 'paid' ? '<span class="status-badge badge-paid">PAGO</span>' :
-                                   s.saleStatus === 'pending' ? '<span class="status-badge badge-pending">GERADO</span>' :
+                const statusBadge = s.status === 'paid' ? '<span class="status-badge badge-paid">PAGO</span>' :
+                                   s.status === 'waiting_payment' ? '<span class="status-badge badge-pending">GERADO</span>' :
                                    s.status === 'checkout_clicked' ? '<span class="status-badge" style="background:#262626">CHECKOUT</span>' :
                                    '<span class="status-badge" style="color:var(--muted)">NAVEGANDO</span>';
                 
                 return `
-                    <div class="activity-item ${isOnline ? 'online' : ''} ${s.saleStatus === 'paid' ? 'paid' : ''}">
+                    <div class="activity-item ${isOnline ? 'online' : ''} ${s.status === 'paid' ? 'paid' : ''}">
                         <div class="user-tag">
                             <span class="user-num">#${sessions.length - idx}</span>
                             <span>${new Date(s.lastUpdate).toLocaleTimeString()}</span>
@@ -225,8 +223,8 @@
                 for(let i=0; i<5; i++) {
                     const variantSessions = sessions.filter(s => s.variantIdx === i);
                     const tests = variantSessions.length;
-                    const paid = variantSessions.filter(s => s.saleStatus === 'paid').length;
-                    const pending = variantSessions.filter(s => s.saleStatus === 'pending').length;
+                    const paid = variantSessions.filter(s => s.status === 'paid').length;
+                    const pending = variantSessions.filter(s => s.status === 'waiting_payment').length;
                     const rate = tests > 0 ? (paid/tests*100) : 0;
                     totalTests += tests;
                     if (rate > bestInGroup.rate && tests > 0) bestInGroup = { idx: i, rate: rate };
