@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligência TRIPE - Dashboard Ultra v9.8 (FIXED)</title>
+    <title>Inteligência TRIPE - Dashboard Ultra v9.9 (MASTER SYNC)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -21,6 +21,15 @@
         .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
         .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; margin-bottom: 20px; }
         .card-title { font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        .notif-container { display: flex; flex-direction: column; gap: 10px; }
+        .notif-item { padding: 15px; border-radius: 16px; border: 1px solid var(--border); display: flex; gap: 15px; align-items: flex-start; animation: slideIn 0.5s ease-out; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .notif-icon { font-size: 20px; }
+        .notif-content { flex: 1; }
+        .notif-title { font-weight: 900; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; }
+        .notif-desc { font-size: 12px; color: var(--muted); line-height: 1.4; }
+        .notif-positive { border-left: 4px solid var(--success); background: rgba(34, 197, 94, 0.05); }
+        .notif-warning { border-left: 4px solid var(--warning); background: rgba(249, 115, 22, 0.05); }
         .angle-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .angle-table th { text-align: left; font-size: 10px; color: var(--muted); text-transform: uppercase; padding: 10px; border-bottom: 1px solid var(--border); }
         .angle-table td { padding: 15px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
@@ -35,20 +44,28 @@
         .badge-paid { background: var(--success); color: black; }
         .badge-pending { background: var(--gold); color: black; }
         .badge-abandon { background: var(--border); color: var(--muted); }
+        .live-tag { background: var(--success); color: black; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 900; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .ab-tag { background: var(--blue); color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 900; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v9.8</span></h1>
-            <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
+            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v9.9</span></h1>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <div class="ab-tag" id="ab-rotation">ROTA A/B: Carregando...</div>
+                <div class="live-tag">WEBHOOK SYNC ACTIVE</div>
+                <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
+            </div>
         </div>
         <div class="stats-grid">
             <div class="stat-card"><span class="stat-label">Visitas Totais</span><span class="stat-value" id="total-visits">0</span></div>
             <div class="stat-card"><span class="stat-label">Carrinho Abandonado</span><span class="stat-value" id="total-abandon" style="color: var(--muted)">0</span></div>
             <div class="stat-card"><span class="stat-label">Pagamento Pendente</span><span class="stat-value" id="total-pending" style="color: var(--gold)">0</span></div>
             <div class="stat-card"><span class="stat-label">Pagamento Aprovado</span><span class="stat-value" id="total-paid" style="color: var(--success)">0</span></div>
-            <div class="stat-card"><span class="stat-label">Faturamento (Est.)</span><span class="stat-value" id="total-revenue" style="color: var(--success)">R$ 0</span></div>
+            <div class="stat-card"><span class="stat-label">Faturamento Real</span><span class="stat-value" id="total-revenue" style="color: var(--success)">R$ 0</span></div>
+            <div class="stat-card"><span class="stat-label">Online Agora</span><span class="stat-value" id="online-now" style="color: var(--gold)">0</span></div>
         </div>
         <div class="main-grid">
             <div class="card">
@@ -56,18 +73,28 @@
                 <canvas id="hourChart" height="180"></canvas>
             </div>
             <div class="card">
-                <div class="card-title">🔴 Monitor em Tempo Real</div>
-                <div class="activity-list" id="activity-list"></div>
+                <div class="card-title">🧠 Notificações Inteligentes (Espião)</div>
+                <div class="notif-container" id="notif-container"></div>
             </div>
         </div>
         <div class="card">
-            <div class="card-title">🧪 Performance por Ângulo</div>
+            <div class="card-title">🧪 Performance por Ângulo (Checkout Precision)</div>
             <table class="angle-table">
                 <thead>
                     <tr><th>Ângulo</th><th>Visitas</th><th>Abandonos</th><th>Pendentes</th><th>Aprovados</th><th>Conversão</th></tr>
                 </thead>
                 <tbody id="angle-performance-body"></tbody>
             </table>
+        </div>
+        <div class="main-grid">
+            <div class="card">
+                <div class="card-title">📊 Retenção do Quiz</div>
+                <canvas id="funnelChart" height="200"></canvas>
+            </div>
+            <div class="card">
+                <div class="card-title">🔴 Monitor em Tempo Real</div>
+                <div class="activity-list" id="activity-list"></div>
+            </div>
         </div>
     </div>
     <script type="module">
@@ -84,38 +111,64 @@
         };
         const app = initializeApp(firebaseConfig );
         const db = getDatabase(app);
-        const TICKET_VALUE = 147;
-        const ANGLE_DETAILS = ["Potencial Sexual", "Diagnóstico", "Transformação", "Performance", "Resultado"];
-
-        let hourChart;
+        const TICKET_VALUE = 12.90; 
+        const ANGLE_DETAILS = [
+            "<strong>Ângulo 1: Potencial Sexual</strong>  
+Foca na descoberta do verdadeiro potencial e ganho rápido.",
+            "<strong>Ângulo 2: Diagnóstico Personalizado</strong>  
+Abordagem técnica e científica baseada em casos de sucesso.",
+            "<strong>Ângulo 3: Transformação de Vida</strong>  
+Foca no impacto emocional e na mudança drástica da autoestima.",
+            "<strong>Ângulo 4: Avaliação de Performance</strong>  
+Foca no desempenho e na comparação com a média.",
+            "<strong>Ângulo 5: Resultado Surpreendente</strong>  
+Foca na curiosidade e na promessa de surpreender o parceiro(a)."
+        ];
+        let hourChart, funnelChart;
         const ctxH = document.getElementById('hourChart').getContext('2d');
         hourChart = new Chart(ctxH, {
             type: 'line',
             data: { labels: Array.from({length: 24}, (_, i) => i+'h'), datasets: [{ label: 'Visitas', data: new Array(24).fill(0), borderColor: '#ef4444', tension: 0.4, fill: true, backgroundColor: 'rgba(239, 68, 68, 0.1)' }] },
             options: { responsive: true, plugins: { legend: { display: false } } }
         });
-
+        const ctxF = document.getElementById('funnelChart').getContext('2d');
+        funnelChart = new Chart(ctxF, {
+            type: 'bar',
+            data: { labels: ['Início', 'P1', 'P4', 'P7', 'Res', 'Pago'], datasets: [{ data: new Array(6).fill(0), backgroundColor: '#ef4444', borderRadius: 5 }] },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+        onValue(ref(db, 'optimization/totalSessions'), (snap) => {
+            const total = snap.val() || 0;
+            const currentAngle = (Math.floor(total / 10) % 5) + 1;
+            const nextIn = 10 - (total % 10);
+            document.getElementById('ab-rotation').innerText = `ROTA ATUAL: ÂNGULO ${currentAngle} (Muda em ${nextIn} leads)`;
+        });
         onValue(ref(db, 'sessions'), (snapshot) => {
             const data = snapshot.val() || {};
             const sessions = Object.entries(data);
-            let totalVisits = 0, totalPaid = 0, totalPending = 0, totalAbandon = 0;
+            let totalVisits = 0, totalPaid = 0, totalPending = 0, totalAbandon = 0, onlineNow = 0;
             const hourData = new Array(24).fill(0);
+            const funnelData = new Array(6).fill(0);
             const angleStats = Array.from({length: 5}, () => ({ visits: 0, paid: 0, pending: 0, abandon: 0 }));
+            const now = Date.now();
             const activityList = document.getElementById('activity-list');
             activityList.innerHTML = '';
-
             sessions.sort((a, b) => (b[1].lastUpdate || 0) - (a[1].lastUpdate || 0)).forEach(([id, s]) => {
                 totalVisits++;
                 const isPaid = s.status === 'paid' || s.status === 'approved';
                 const isPending = s.status === 'waiting_payment' || s.status === 'pending' || s.status === 'unpaid';
                 const isAbandon = s.status === 'checkout_clicked' && !isPaid && !isPending;
-
                 if (isPaid) totalPaid++;
                 if (isPending) totalPending++;
                 if (isAbandon) totalAbandon++;
-
+                if (now - (s.lastUpdate || 0) < 300000) onlineNow++;
                 if (s.enteredAt) hourData[new Date(s.enteredAt).getHours()]++;
-
+                if (s.currentStep >= 0) funnelData[0]++;
+                if (s.currentStep >= 1) funnelData[1]++;
+                if (s.currentStep >= 4) funnelData[2]++;
+                if (s.currentStep >= 7) funnelData[3]++;
+                if (s.currentStep >= 10) funnelData[4]++;
+                if (isPaid) funnelData[5]++;
                 const vIdx = s.variantIdx !== undefined ? s.variantIdx : -1;
                 if (vIdx >= 0 && vIdx < 5) {
                     angleStats[vIdx].visits++;
@@ -123,30 +176,57 @@
                     if (isPending) angleStats[vIdx].pending++;
                     if (isAbandon) angleStats[vIdx].abandon++;
                 }
-
                 const item = document.createElement('div');
                 item.className = `activity-item ${isPaid ? 'paid' : (isPending ? 'pending' : '')}`;
-                item.innerHTML = `<div style="font-weight:900; font-size:12px;">ID: ${id.substring(0,6)} | Ângulo ${vIdx+1} <span class="status-badge ${isPaid?'badge-paid':(isPending?'badge-pending':'badge-abandon')}">${isPaid?'PAGO':(isPending?'PENDENTE':'ABANDONOU')}</span></div>`;
+                item.innerHTML = `
+                    <div class="user-tag">
+                        <span class="user-num">ID: ${id.substring(0,6)}</span>
+                        <span>Ângulo ${vIdx+1}</span>
+                        <span class="status-badge ${isPaid?'badge-paid':(isPending?'badge-pending':'badge-abandon')}">${isPaid?'PAGO':(isPending?'PENDENTE':(s.status==='checkout_clicked'?'ABANDONOU':'NAVEGANDO'))}</span>
+                    </div>
+                    <div style="font-size: 10px; color: var(--muted)">Passo: ${s.currentStep || 0}/10 | ${new Date(s.lastUpdate || s.enteredAt).toLocaleTimeString()}</div>
+                `;
                 activityList.appendChild(item);
             });
-
             document.getElementById('total-visits').innerText = totalVisits;
             document.getElementById('total-paid').innerText = totalPaid;
             document.getElementById('total-pending').innerText = totalPending;
             document.getElementById('total-abandon').innerText = totalAbandon;
             document.getElementById('total-revenue').innerText = 'R$ ' + (totalPaid * TICKET_VALUE).toLocaleString();
+            document.getElementById('online-now').innerText = onlineNow;
             hourChart.data.datasets[0].data = hourData;
             hourChart.update();
-
+            funnelChart.data.datasets[0].data = funnelData;
+            funnelChart.update();
             const tableBody = document.getElementById('angle-performance-body');
             tableBody.innerHTML = '';
             angleStats.forEach((stat, i) => {
                 const conv = stat.visits > 0 ? ((stat.paid / stat.visits) * 100).toFixed(1) : 0;
-                tableBody.innerHTML += `<tr><td>Ângulo ${i+1}</td><td>${stat.visits}</td><td>${stat.abandon}</td><td style="color:var(--gold)">${stat.pending}</td><td style="color:var(--success)">${stat.paid}</td><td>${conv}%</td></tr>`;
+                tableBody.innerHTML += `
+                    <tr>
+                        <td><div class="angle-name">Ângulo ${i+1} ℹ️<div class="tooltip">${ANGLE_DETAILS[i]}</div></div></td>
+                        <td>${stat.visits}</td>
+                        <td>${stat.abandon}</td>
+                        <td style="color:var(--gold)">${stat.pending}</td>
+                        <td style="color:var(--success)">${stat.paid}</td>
+                        <td><span style="font-weight:900; color:var(--success)">${conv}%</span></td>
+                    </tr>`;
             });
+            const notifContainer = document.getElementById('notif-container');
+            notifContainer.innerHTML = '';
+            if (totalPaid > 0) addNotif('💰 SUCESSO!', `Faturamento real em R$ ${(totalPaid * TICKET_VALUE).toLocaleString()}.`, 'positive');
+            if (totalAbandon > totalPaid * 2) addNotif('⚠️ ALERTA', `Muitos abandonos no checkout (${totalAbandon}).`, 'warning');
+            const bestAngle = angleStats.reduce((prev, curr) => (prev.paid > curr.paid) ? prev : curr);
+            if (bestAngle.paid > 0) addNotif('🔥 VENCEDOR', `Ângulo ${angleStats.indexOf(bestAngle)+1} está convertendo melhor!`, 'positive');
         });
-
-        document.getElementById('reset-btn').onclick = () => { if (confirm('Zerar tudo?')) { remove(ref(db, 'sessions')); location.reload(); } };
+        function addNotif(title, desc, type) {
+            const container = document.getElementById('notif-container');
+            const item = document.createElement('div');
+            item.className = `notif-item notif-${type}`;
+            item.innerHTML = `<div class="notif-icon">${type === 'positive' ? '✅' : '⚠️'}</div><div class="notif-content"><div class="notif-title">${title}</div><div class="notif-desc">${desc}</div></div>`;
+            container.appendChild(item);
+        }
+        document.getElementById('reset-btn').onclick = () => { if (confirm('Zerar tudo?')) { remove(ref(db, 'sessions')); update(ref(db, 'optimization'), { totalSessions: 0 }); location.reload(); } };
     </script>
 </body>
 </html>
