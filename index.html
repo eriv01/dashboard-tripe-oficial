@@ -1,30 +1,26 @@
-lucas boi
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligência TRIPE - Dashboard Ultra v9.6 (CHECKOUT PRECISION)</title>
+    <title>Inteligência TRIPE - Dashboard Ultra v9.7 (WEBHOOK SYNC)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #ef4444; --bg: #0a0a0a; --card: #141414; --text: #ffffff; --muted: #9ca3af; --border: #262626; --success: #22c55e; --gold: #fbbf24; --blue: #3b82f6; --warning: #f97316; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg ); color: var(--text); margin: 0; padding: 20px; overflow-x: hidden; }
         .container { max-width: 1200px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
         .header h1 { font-weight: 900; font-size: 28px; letter-spacing: -1px; display: flex; align-items: center; gap: 10px; }
         .btn-reset { background: rgba(239, 68, 68, 0.1); color: var(--primary); border: 1px solid var(--primary); padding: 10px 20px; border-radius: 8px; font-size: 12px; font-weight: 900; cursor: pointer; transition: all 0.2s; }
         .btn-reset:hover { background: var(--primary); color: white; }
-        
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 30px; }
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 20px; position: relative; overflow: hidden; }
         .stat-label { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; margin-bottom: 8px; display: block; }
         .stat-value { font-size: 24px; font-weight: 900; display: block; }
-
         .main-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; margin-bottom: 20px; }
         .card { background: var(--card); border: 1px solid var(--border); padding: 25px; border-radius: 24px; margin-bottom: 20px; }
         .card-title { font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
-        
         .notif-container { display: flex; flex-direction: column; gap: 10px; }
         .notif-item { padding: 15px; border-radius: 16px; border: 1px solid var(--border); display: flex; gap: 15px; align-items: flex-start; animation: slideIn 0.5s ease-out; }
         @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
@@ -35,28 +31,23 @@ lucas boi
         .notif-positive { border-left: 4px solid var(--success); background: rgba(34, 197, 94, 0.05); }
         .notif-warning { border-left: 4px solid var(--warning); background: rgba(249, 115, 22, 0.05); }
         .notif-danger { border-left: 4px solid var(--primary); background: rgba(239, 68, 68, 0.05); }
-
         .angle-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         .angle-table th { text-align: left; font-size: 10px; color: var(--muted); text-transform: uppercase; padding: 10px; border-bottom: 1px solid var(--border); }
         .angle-table td { padding: 15px 10px; border-bottom: 1px solid var(--border); font-size: 13px; }
-        .angle-row.winner { background: rgba(34, 197, 94, 0.05); }
         .angle-name { font-weight: 900; display: flex; align-items: center; gap: 8px; position: relative; cursor: help; }
-        
-        /* Tooltip */
         .tooltip { visibility: hidden; width: 200px; background-color: #1a1a1a; color: #fff; text-align: left; border-radius: 8px; padding: 12px; position: absolute; z-index: 100; bottom: 125%; left: 0; opacity: 0; transition: opacity 0.3s; border: 1px solid var(--border); font-size: 11px; font-weight: 400; line-height: 1.4; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .angle-name:hover .tooltip { visibility: visible; opacity: 1; }
         .rate-badge { font-weight: 900; color: var(--success); font-size: 14px; }
-
         .activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 500px; overflow-y: auto; }
         .activity-item { background: #0f0f0f; border: 1px solid var(--border); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .activity-item.online { border-left: 4px solid var(--success); }
-        .activity-item.paid { border-color: var(--success); background: rgba(34, 197, 94, 0.05); }
+        .activity-item.paid { border-color: var(--success); background: rgba(34, 197, 94, 0.05); border-left: 4px solid var(--success); }
+        .activity-item.pending { border-color: var(--gold); background: rgba(251, 191, 36, 0.05); border-left: 4px solid var(--gold); }
         .user-tag { font-weight: 900; font-size: 12px; display: flex; align-items: center; gap: 8px; }
         .user-num { background: var(--primary); color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; }
         .status-badge { font-size: 9px; font-weight: 900; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; }
         .badge-paid { background: var(--success); color: black; }
         .badge-pending { background: var(--gold); color: black; }
-        
+        .badge-abandon { background: var(--border); color: var(--muted); }
         .live-tag { background: var(--success); color: black; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 900; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
@@ -64,13 +55,12 @@ lucas boi
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v9.6</span></h1>
+            <h1>🚀 TRIPE <span style="color: var(--primary)">ULTRA v9.7</span></h1>
             <div style="display: flex; gap: 15px; align-items: center;">
-                <div class="live-tag">CHECKOUT PRECISION ACTIVE</div>
+                <div class="live-tag">WEBHOOK SYNC ACTIVE</div>
                 <button class="btn-reset" id="reset-btn">🔄 RESET TOTAL</button>
             </div>
         </div>
-
         <div class="stats-grid">
             <div class="stat-card"><span class="stat-label">Visitas Totais</span><span class="stat-value" id="total-visits">0</span></div>
             <div class="stat-card"><span class="stat-label">Carrinho Abandonado</span><span class="stat-value" id="total-abandon" style="color: var(--muted)">0</span></div>
@@ -79,7 +69,6 @@ lucas boi
             <div class="stat-card"><span class="stat-label">Faturamento (Est.)</span><span class="stat-value" id="total-revenue" style="color: var(--success)">R$ 0</span></div>
             <div class="stat-card"><span class="stat-label">Online Agora</span><span class="stat-value" id="online-now" style="color: var(--gold)">0</span></div>
         </div>
-
         <div class="main-grid">
             <div class="card">
                 <div class="card-title">📈 Fluxo de Acessos (24h)</div>
@@ -92,7 +81,6 @@ lucas boi
                 </div>
             </div>
         </div>
-
         <div class="card">
             <div class="card-title">🧪 Performance por Ângulo Completo (Funil de Checkout)</div>
             <table class="angle-table">
@@ -109,7 +97,6 @@ lucas boi
                 <tbody id="angle-performance-body"></tbody>
             </table>
         </div>
-
         <div class="main-grid">
             <div class="card">
                 <div class="card-title">📊 Retenção do Quiz (Drop-off)</div>
@@ -121,11 +108,9 @@ lucas boi
             </div>
         </div>
     </div>
-
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getDatabase, ref, onValue, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
         const firebaseConfig = {
             apiKey: "AIzaSyCDYmSVU2xVVuLw0vu3svKI7n4hvdxjW0w",
             authDomain: "projeto-tripe-oficial.firebaseapp.com",
@@ -135,35 +120,22 @@ lucas boi
             messagingSenderId: "274742031259",
             appId: "1:274742031259:web:18dc5c086fe3d58b56673e"
         };
-
-        const app = initializeApp(firebaseConfig);
+        const app = initializeApp(firebaseConfig );
         const db = getDatabase(app);
         const TICKET_VALUE = 147; 
-
         const ANGLE_DETAILS = [
-            "<strong>Ângulo 1: Potencial Sexual</strong><br>Foca na descoberta do verdadeiro potencial e ganho rápido em 30 dias. Ideal para público mais jovem.",
-            "<strong>Ângulo 2: Diagnóstico Personalizado</strong><br>Abordagem técnica e científica. Foca na autoridade do diagnóstico baseado em casos de sucesso.",
-            "<strong>Ângulo 3: Transformação de Vida</strong><br>Foca no impacto emocional e na mudança drástica da vida sexual e autoestima.",
-            "<strong>Ângulo 4: Avaliação de Performance</strong><br>Foca no desempenho e na comparação com a média. Aponta o potencial reprimido.",
-            "<strong>Ângulo 5: Resultado Surpreendente</strong><br>Foca na curiosidade e na promessa de um resultado que vai surpreender o parceiro(a)."
+            "<strong>Ângulo 1: Potencial Sexual</strong>  
+Foca na descoberta do verdadeiro potencial e ganho rápido em 30 dias.",
+            "<strong>Ângulo 2: Diagnóstico Personalizado</strong>  
+Abordagem técnica e científica baseada em casos de sucesso.",
+            "<strong>Ângulo 3: Transformação de Vida</strong>  
+Foca no impacto emocional e na mudança drástica da autoestima.",
+            "<strong>Ângulo 4: Avaliação de Performance</strong>  
+Foca no desempenho e na comparação com a média.",
+            "<strong>Ângulo 5: Resultado Surpreendente</strong>  
+Foca na curiosidade e na promessa de surpreender o parceiro(a)."
         ];
-
-        function checkIncomingWebhook() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sid = urlParams.get('external_id');
-            const status = urlParams.get('status');
-            if (sid && status) {
-                let novoStatus = 'checkout_clicked';
-                if (status === 'approved') novoStatus = 'paid';
-                if (status === 'pending') novoStatus = 'waiting_payment';
-                update(ref(db, 'sessions/' + sid), { status: novoStatus, payment_status: status, last_webhook_update: Date.now() })
-                .then(() => window.history.replaceState({}, document.title, window.location.pathname));
-            }
-        }
-        checkIncomingWebhook();
-
         let hourChart, funnelChart;
-
         function initCharts() {
             const ctxH = document.getElementById('hourChart').getContext('2d');
             hourChart = new Chart(ctxH, {
@@ -171,7 +143,6 @@ lucas boi
                 data: { labels: Array.from({length: 24}, (_, i) => i+'h'), datasets: [{ label: 'Visitas', data: new Array(24).fill(0), borderColor: '#ef4444', tension: 0.4, fill: true, backgroundColor: 'rgba(239, 68, 68, 0.1)' }] },
                 options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#262626' } }, x: { grid: { display: false } } } }
             });
-
             const ctxF = document.getElementById('funnelChart').getContext('2d');
             funnelChart = new Chart(ctxF, {
                 type: 'bar',
@@ -179,158 +150,109 @@ lucas boi
                 options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#262626' } } } }
             });
         }
-
-        onValue(ref(db, 'sessions'), (snapshot) => {
-            const data = snapshot.val() || {};
-            const sessions = Object.values(data).sort((a,b) => (b.lastUpdate || b.enteredAt) - (a.lastUpdate || a.enteredAt));
-            const now = Date.now();
-            
-            const paidSessions = sessions.filter(s => s.status === 'paid');
-            const pendingSessions = sessions.filter(s => s.status === 'waiting_payment');
-            const checkoutClicked = sessions.filter(s => s.status === 'checkout_clicked');
-            
-            // Carrinho Abandonado = Clicou no checkout mas não pagou nem gerou pendente
-            const abandonCount = checkoutClicked.length;
-            
-            document.getElementById('total-visits').innerText = sessions.length;
-            document.getElementById('total-abandon').innerText = abandonCount;
-            document.getElementById('total-paid').innerText = paidSessions.length;
-            document.getElementById('total-revenue').innerText = 'R$ ' + (paidSessions.length * TICKET_VALUE).toLocaleString('pt-BR');
-            document.getElementById('total-pending').innerText = pendingSessions.length;
-            
-            const onlineCount = sessions.filter(s => now - (s.lastUpdate || s.enteredAt) < 60000).length;
-            document.getElementById('online-now').innerText = onlineCount;
-
-            const hours = new Array(24).fill(0);
-            sessions.forEach(s => { const h = new Date(s.enteredAt).getHours(); hours[h]++; });
-            hourChart.data.datasets[0].data = hours;
-            hourChart.update();
-
-            const funnelData = new Array(6).fill(0);
-            sessions.forEach(s => {
-                funnelData[0]++;
-                if (s.currentStep >= 1) funnelData[1]++;
-                if (s.currentStep >= 4) funnelData[2]++;
-                if (s.currentStep >= 7) funnelData[3]++;
-                if (s.currentStep === 'result' || s.status === 'checkout_clicked' || s.status === 'paid' || s.status === 'waiting_payment') funnelData[4]++;
-                if (s.status === 'paid') funnelData[5]++;
+        function updateDashboard() {
+            onValue(ref(db, 'sessions'), (snapshot) => {
+                const data = snapshot.val() || {};
+                const sessions = Object.entries(data);
+                let totalVisits = 0, totalPaid = 0, totalPending = 0, totalAbandon = 0, onlineNow = 0;
+                const hourData = new Array(24).fill(0);
+                const funnelData = new Array(6).fill(0);
+                const angleStats = Array.from({length: 5}, () => ({ visits: 0, paid: 0, pending: 0, abandon: 0 }));
+                const now = Date.now();
+                const sortedSessions = sessions.sort((a, b) => (b[1].lastUpdate || 0) - (a[1].lastUpdate || 0));
+                const activityList = document.getElementById('activity-list');
+                activityList.innerHTML = '';
+                sessions.forEach(([id, s]) => {
+                    totalVisits++;
+                    const isPaid = s.status === 'paid' || s.status === 'approved';
+                    const isPending = s.status === 'waiting_payment' || s.status === 'pending' || s.status === 'unpaid';
+                    const isAbandon = s.status === 'checkout_clicked' && !isPaid && !isPending;
+                    if (isPaid) totalPaid++;
+                    if (isPending) totalPending++;
+                    if (isAbandon) totalAbandon++;
+                    if (now - (s.lastUpdate || 0) < 300000) onlineNow++;
+                    if (s.enteredAt) {
+                        const hour = new Date(s.enteredAt).getHours();
+                        hourData[hour]++;
+                    }
+                    if (s.currentStep >= 0) funnelData[0]++;
+                    if (s.currentStep >= 1) funnelData[1]++;
+                    if (s.currentStep >= 4) funnelData[2]++;
+                    if (s.currentStep >= 7) funnelData[3]++;
+                    if (s.currentStep >= 10) funnelData[4]++;
+                    if (isPaid) funnelData[5]++;
+                    const vIdx = s.variantIdx !== undefined ? s.variantIdx : -1;
+                    if (vIdx >= 0 && vIdx < 5) {
+                        angleStats[vIdx].visits++;
+                        if (isPaid) angleStats[vIdx].paid++;
+                        if (isPending) angleStats[vIdx].pending++;
+                        if (isAbandon) angleStats[vIdx].abandon++;
+                    }
+                });
+                document.getElementById('total-visits').innerText = totalVisits;
+                document.getElementById('total-paid').innerText = totalPaid;
+                document.getElementById('total-pending').innerText = totalPending;
+                document.getElementById('total-abandon').innerText = totalAbandon;
+                document.getElementById('total-revenue').innerText = 'R$ ' + (totalPaid * TICKET_VALUE).toLocaleString();
+                document.getElementById('online-now').innerText = onlineNow;
+                hourChart.data.datasets[0].data = hourData;
+                hourChart.update();
+                funnelChart.data.datasets[0].data = funnelData;
+                funnelChart.update();
+                const tableBody = document.getElementById('angle-performance-body');
+                tableBody.innerHTML = '';
+                angleStats.forEach((stat, i) => {
+                    const conv = stat.visits > 0 ? ((stat.paid / stat.visits) * 100).toFixed(1) : 0;
+                    const row = document.createElement('tr');
+                    row.className = 'angle-row';
+                    row.innerHTML = `
+                        <td><div class="angle-name">Ângulo ${i+1} ℹ️<div class="tooltip">${ANGLE_DETAILS[i]}</div></div></td>
+                        <td>${stat.visits}</td>
+                        <td>${stat.abandon}</td>
+                        <td style="color: var(--gold)">${stat.pending}</td>
+                        <td style="color: var(--success)">${stat.paid}</td>
+                        <td><span class="rate-badge">${conv}%</span></td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+                sortedSessions.slice(0, 15).forEach(([id, s]) => {
+                    const isPaid = s.status === 'paid' || s.status === 'approved';
+                    const isPending = s.status === 'waiting_payment' || s.status === 'pending' || s.status === 'unpaid';
+                    const item = document.createElement('div');
+                    item.className = `activity-item ${isPaid ? 'paid' : (isPending ? 'pending' : '')}`;
+                    let statusLabel = 'Navegando';
+                    let badgeClass = 'badge-abandon';
+                    if (isPaid) { statusLabel = 'APROVADO'; badgeClass = 'badge-paid'; }
+                    else if (isPending) { statusLabel = 'PENDENTE'; badgeClass = 'badge-pending'; }
+                    else if (s.status === 'checkout_clicked') { statusLabel = 'ABANDONOU CK'; badgeClass = 'badge-abandon'; }
+                    item.innerHTML = `
+                        <div class="user-tag"><span class="user-num">ID: ${id.substring(0,6)}</span><span>Ângulo ${s.variantIdx + 1}</span><span class="status-badge ${badgeClass}">${statusLabel}</span></div>
+                        <div style="font-size: 10px; color: var(--muted)">Passo: ${s.currentStep || 0}/10 | Atualizado: ${new Date(s.lastUpdate || s.enteredAt).toLocaleTimeString()}</div>
+                    `;
+                    activityList.appendChild(item);
+                });
+                const notifContainer = document.getElementById('notif-container');
+                notifContainer.innerHTML = '';
+                if (totalPaid > 0) addNotif('💰 SUCESSO!', `Faturamento estimado em R$ ${(totalPaid * TICKET_VALUE).toLocaleString()}.`, 'positive');
+                if (totalAbandon > totalPaid * 3) addNotif('⚠️ ALERTA DE FUGA', `Muitos abandonos no checkout (${totalAbandon}).`, 'warning');
             });
-            funnelChart.data.datasets[0].data = funnelData;
-            funnelChart.update();
-
-            const activityList = document.getElementById('activity-list');
-            activityList.innerHTML = sessions.slice(0, 20).map((s, idx) => {
-                const isOnline = now - (s.lastUpdate || s.enteredAt) < 60000;
-                const statusBadge = s.status === 'paid' ? '<span class="status-badge badge-paid">APROVADO</span>' :
-                                   s.status === 'waiting_payment' ? '<span class="status-badge badge-pending">PENDENTE</span>' :
-                                   s.status === 'checkout_clicked' ? '<span class="status-badge" style="background:#262626">ABANDONADO</span>' :
-                                   '<span class="status-badge" style="color:var(--muted)">NAVEGANDO</span>';
-                return `
-                    <div class="activity-item ${isOnline ? 'online' : ''} ${s.status === 'paid' ? 'paid' : ''}">
-                        <div class="user-tag">
-                            <span class="user-num">#${sessions.length - idx}</span>
-                            <span>${new Date(s.lastUpdate || s.enteredAt).toLocaleTimeString()}</span>
-                            ${statusBadge}
-                        </div>
-                        <div style="font-size:10px; color:var(--muted); display:flex; justify-content:space-between;">
-                            <span>Ângulo: ${(s.variantIdx !== undefined ? s.variantIdx : (s.variant !== undefined ? s.variant : 0)) + 1}</span>
-                            <span>Etapa: ${s.currentStep || 'Início'}</span>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            updateAnglePerformance(sessions);
-            runSmartSpy(sessions, funnelData);
-        });
-
-        function updateAnglePerformance(sessions) {
-            const tbody = document.getElementById('angle-performance-body');
-            let angles = [];
-            let bestRate = -1;
-            let winnerIdx = -1;
-
-            for(let i=0; i<5; i++) {
-                const variantSessions = sessions.filter(s => (s.variantIdx === i || s.variant === i));
-                const visits = variantSessions.length;
-                const paid = variantSessions.filter(s => s.status === 'paid').length;
-                const pending = variantSessions.filter(s => s.status === 'waiting_payment').length;
-                const abandonos = variantSessions.filter(s => s.status === 'checkout_clicked').length;
-                const rate = visits > 0 ? (paid / visits * 100) : 0;
-                if (rate > bestRate && visits > 0) {
-                    bestRate = rate;
-                    winnerIdx = i;
-                }
-                angles.push({ idx: i, visits, abandonos, pending, paid, rate });
-            }
-
-            tbody.innerHTML = angles.map(a => `
-                <tr class="angle-row ${a.idx === winnerIdx ? 'winner' : ''}">
-                    <td>
-                        <div class="angle-name">
-                            Ângulo ${a.idx + 1} ${a.idx === winnerIdx ? '🏆' : 'ℹ️'}
-                            <div class="tooltip">${ANGLE_DETAILS[a.idx]}</div>
-                        </div>
-                    </td>
-                    <td>${a.visits}</td>
-                    <td><span style="color:var(--muted)">${a.abandonos}</span></td>
-                    <td><span style="color:var(--gold)">${a.pending}</span></td>
-                    <td><span style="color:var(--success); font-weight:900;">${a.paid}</span></td>
-                    <td><span class="rate-badge">${a.rate.toFixed(1)}%</span></td>
-                </tr>
-            `).join('');
         }
-
-        function runSmartSpy(sessions, funnelData) {
+        function addNotif(title, desc, type) {
             const container = document.getElementById('notif-container');
-            const notifs = [];
-
-            const dropP1 = funnelData[0] > 0 ? (1 - (funnelData[1] / funnelData[0])) * 100 : 0;
-            if (dropP1 > 40) {
-                notifs.push({ type: 'danger', icon: '⚠️', title: 'Fuga Crítica no Início', desc: `${dropP1.toFixed(1)}% dos usuários saem antes da Pergunta 1. Revise sua Saudação.` });
-            }
-
-            const checkoutClicks = sessions.filter(s => s.status === 'checkout_clicked' || s.status === 'paid' || s.status === 'waiting_payment').length;
-            const paidCount = sessions.filter(s => s.status === 'paid').length;
-            const checkoutDrop = checkoutClicks > 0 ? (1 - (paidCount / checkoutClicks)) * 100 : 0;
-            if (checkoutDrop > 70 && checkoutClicks > 5) {
-                notifs.push({ type: 'warning', icon: '💸', title: 'Carrinho Abandonado Alto', desc: `${checkoutDrop.toFixed(1)}% chegam ao checkout mas não finalizam. Verifique a oferta.` });
-            }
-
-            let bestAngle = { idx: -1, rate: 0 };
-            for(let i=0; i<5; i++) {
-                const vSess = sessions.filter(s => (s.variantIdx === i || s.variant === i));
-                const rate = vSess.length > 0 ? (vSess.filter(s => s.status === 'paid').length / vSess.length) * 100 : 0;
-                if (rate > bestAngle.rate) bestAngle = { idx: i, rate: rate };
-            }
-            if (bestAngle.rate > 5) {
-                notifs.push({ type: 'positive', icon: '🔥', title: 'Ângulo Escaldante', desc: `O Ângulo ${bestAngle.idx + 1} está convertendo ${bestAngle.rate.toFixed(1)}%. Considere enviar mais tráfego para ele.` });
-            }
-
-            if (notifs.length === 0) {
-                container.innerHTML = '<div style="color:var(--muted); font-size:12px; text-align:center; padding:20px;">Sistema operando normalmente. Sem anomalias detectadas.</div>';
-            } else {
-                container.innerHTML = notifs.map(n => `
-                    <div class="notif-item notif-${n.type}">
-                        <div class="notif-icon">${n.icon}</div>
-                        <div class="notif-content">
-                            <div class="notif-title">${n.title}</div>
-                            <div class="notif-desc">${n.desc}</div>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            const item = document.createElement('div');
+            item.className = `notif-item notif-${type}`;
+            item.innerHTML = `<div class="notif-icon">${type === 'positive' ? '✅' : '⚠️'}</div><div class="notif-content"><div class="notif-title">${title}</div><div class="notif-desc">${desc}</div></div>`;
+            container.appendChild(item);
         }
-
         document.getElementById('reset-btn').onclick = () => {
-            if(confirm('⚠️ RESET TOTAL: Apagar todos os dados?')) {
+            if (confirm('Deseja zerar TODOS os dados?')) {
                 remove(ref(db, 'sessions'));
                 update(ref(db, 'optimization'), { totalSessions: 0 });
                 location.reload();
             }
         };
-
         initCharts();
+        updateDashboard();
     </script>
 </body>
 </html>
