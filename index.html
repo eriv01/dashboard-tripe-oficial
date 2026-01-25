@@ -2,95 +2,88 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Protocolo TRIPE - Oficial</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard TRIPE - Analytics v9.7</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #ef4444; --bg: #0a0a0a; --card: #141414; --text: #ffffff; --muted: #9ca3af; --border: #262626; }
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg ); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .quiz-card { width: 100%; max-width: 450px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); text-align: center; }
-        .fixed-header { font-size: 10px; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
-        .progress-bar { height: 4px; background: var(--border); border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary); width: 0%; transition: width 0.3s ease; }
-        .question-title { font-size: 24px; font-weight: 900; margin-bottom: 15px; line-height: 1.3; }
-        .options-grid { display: grid; gap: 12px; margin-bottom: 25px; }
-        .option-btn { background: var(--card); border: 2px solid var(--border); color: var(--text); padding: 16px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: all 0.2s; }
-        .option-btn.selected { border-color: var(--primary); background: rgba(239, 68, 68, 0.2); }
-        .btn-next { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 12px; font-weight: 900; cursor: pointer; width: 100%; font-size: 16px; }
-        .screen { display: none; }
-        .screen.active { display: block; }
-        .urgency-badge { background: rgba(239, 68, 68, 0.2); border: 2px solid var(--primary); padding: 10px 15px; border-radius: 50px; display: inline-block; margin-bottom: 20px; font-weight: 900; color: var(--primary); font-size: 12px; }
-        .carousel { width: 100%; height: 250px; background: #000; border-radius: 15px; margin: 15px 0; overflow: hidden; position: relative; border: 1px solid var(--border); }
-        .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.6s ease; }
-        .slide.active { opacity: 1; }
-        .slide img { width: 100%; height: 100%; object-fit: cover; }
-        .slide-info { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); padding: 8px; font-size: 12px; }
-        .loading-bar-container { text-align: left; margin-bottom: 12px; }
-        .loading-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; display: block; }
-        .loading-bar { height: 6px; background: var(--border); border-radius: 10px; overflow: hidden; }
-        .loading-fill { height: 100%; background: var(--primary); width: 0%; animation: load 2s infinite; }
-        @keyframes load { 0% { width: 0%; } 50% { width: 100%; } 100% { width: 100%; } }
-        .result-badge { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; font-weight: 900; font-size: 28px; }
+        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #e5e7eb; }
+        .glass { background: rgba(17, 17, 17, 0.8 ); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .card-stat { transition: transform 0.2s; }
+        .card-stat:hover { transform: translateY(-4px); }
+        .variant-row:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
     </style>
 </head>
-<body>
-    <div class="quiz-card">
-        <div id="s-0" class="screen active">
-            <div class="fixed-header">AVALIAÇÃO PERSONALIZADA - MÉTODO TRIPE</div>
-            <div class="question-title" id="sal-title">VOCÊ ESTÁ A UM PASSO...</div>
-            <p style="color: var(--muted); margin-bottom: 25px;" id="sal-sub">De descobrir seu verdadeiro potencial sexual</p>
-            <button class="btn-next" onclick="next()">INICIAR AGORA</button>
-        </div>
-        <div id="s-1" class="screen">
-            <div class="fixed-header">AVALIAÇÃO PERSONALIZADA - MÉTODO TRIPE</div>
-            <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
-            <div id="q-box"></div>
-        </div>
-        <div id="s-2" class="screen">
-            <div class="urgency-badge">🔥 164 homens avaliando agora</div>
-            <div class="fixed-header">PROCESSANDO SEUS DADOS...</div>
-            <div class="carousel">
-                <div class="slide active">
-                    <img src="https://metodotripe.shop/wp-content/uploads/2026/01/22109742.jpg">
-                    <div class="slide-info"><strong>Ricardo, 34 anos</strong> • +4.2cm em 28 dias</div>
-                </div>
-                <div class="slide">
-                    <img src="https://metodotripe.shop/wp-content/uploads/2026/01/meaSaaTbaAaaaamhD_iLJzfk9u2QO-ZC1.jpg">
-                    <div class="slide-info"><strong>Marcelo, 41 anos</strong> • +3.8cm em 30 dias</div>
-                </div>
-                <div class="slide">
-                    <img src="https://metodotripe.shop/wp-content/uploads/2026/01/paciente-D-antes-e-depois-alongamento-peniano-faloplastia-fotor-20260119195743.png">
-                    <div class="slide-info"><strong>Felipe, 28 anos</strong> • +5.1cm em 35 dias</div>
-                </div>
-                <div class="slide">
-                    <img src="https://metodotripe.shop/wp-content/uploads/2024/12/WhatsApp-Image-2024-12-18-at-15.11.46-rcl53qv1p0gr5s3fzr30gvvchnyybvpbhth13gqhj4.jpeg">
-                    <div class="slide-info"><strong>João, 45 anos</strong> • +4.5cm em 32 dias</div>
-                </div>
-                <div class="slide">
-                    <img src="https://metodotripe.shop/wp-content/uploads/2026/01/Fotos-de-penis-grande10.jpg">
-                    <div class="slide-info"><strong>Marcos, 39 anos</strong> • +4.8cm em 29 dias</div>
-                </div>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-800 tracking-tighter text-white">MÉTODO <span class="text-red-500">TRIPE</span></h1>
+                <p class="text-gray-500 text-sm">Analytics em Tempo Real • v9.7</p>
             </div>
-            <div id="loading-steps">
-                <div class="loading-bar-container"><span class="loading-label">✓ Analisando tecidos cavernosos...</span><div class="loading-bar"><div class="loading-fill"></div></div></div>
-                <div class="loading-bar-container"><span class="loading-label">⏳ Verificando densidade dos corpos cavernosos...</span><div class="loading-bar"><div class="loading-fill" style="animation-delay: 0.5s"></div></div></div>
-                <div class="loading-bar-container"><span class="loading-label">⏳ Ajustando protocolo de expansão celular...</span><div class="loading-bar"><div class="loading-fill" style="animation-delay: 1s"></div></div></div>
-                <div class="loading-bar-container"><span class="loading-label">⏳ Validando compatibilidade de tecidos...</span><div class="loading-bar"><div class="loading-fill" style="animation-delay: 1.5s"></div></div></div>
+            <div id="connection-status" class="px-4 py-2 rounded-full bg-green-500/10 border border-green-500/20 text-green-500 text-xs font-bold flex items-center gap-2">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div> CONECTADO AO FIREBASE
             </div>
-            <p style="font-size: 12px; color: var(--muted ); margin-top: 15px;">Comparando com 10.847 casos de sucesso...</p>
         </div>
-        <div id="s-3" class="screen">
-            <div class="fixed-header">RESULTADO GERADO</div>
-            <div class="result-badge" id="res-val">+4.5cm</div>
-            <p style="margin-bottom: 20px; color: var(--muted);" id="res-text">Você pode ganhar até <strong style="color: white" id="res-txt"></strong> em 30 dias.</p>
-            <button class="btn-next" onclick="finish()" id="cta-btn">ACESSAR PROTOCOLO TRIPE</button>
+
+        <!-- Resumo Geral -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="glass p-6 rounded-3xl card-stat">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Total de Leads</p>
+                <h2 id="total-leads" class="text-4xl font-800 text-white">0</h2>
+            </div>
+            <div class="glass p-6 rounded-3xl card-stat border-l-4 border-yellow-500">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Gerados (Pix/Bol)</p>
+                <h2 id="total-generated" class="text-4xl font-800 text-yellow-500">0</h2>
+            </div>
+            <div class="glass p-6 rounded-3xl card-stat border-l-4 border-green-500">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Vendas Aprovadas</p>
+                <h2 id="total-sales" class="text-4xl font-800 text-green-500">0</h2>
+            </div>
+            <div class="glass p-6 rounded-3xl card-stat">
+                <p class="text-gray-400 text-xs font-bold uppercase mb-1">Faturamento Total</p>
+                <h2 id="total-revenue" class="text-4xl font-800 text-white">R$ 0,00</h2>
+            </div>
+        </div>
+
+        <!-- Tabela de Variantes A/B -->
+        <div class="glass rounded-3xl overflow-hidden mb-8">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center">
+                <h3 class="font-800 text-xl text-white">Performance por Variante (A/B Test)</h3>
+                <span class="text-xs text-gray-500 uppercase font-bold">Atualização Automática</span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-gray-400 text-xs uppercase font-bold border-b border-white/5">
+                            <th class="p-6">Variante</th>
+                            <th class="p-6">Leads</th>
+                            <th class="p-6">Gerados</th>
+                            <th class="p-6">Vendas</th>
+                            <th class="p-6">Conversão</th>
+                            <th class="p-6">Faturamento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="variants-table-body">
+                        <!-- Injetado via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Log de Atividade Recente -->
+        <div class="glass rounded-3xl p-6">
+            <h3 class="font-800 text-xl text-white mb-4">Últimos Eventos</h3>
+            <div id="event-log" class="space-y-3 max-h-60 overflow-y-auto pr-2">
+                <!-- Injetado via JS -->
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, update, get, serverTimestamp, increment } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
         const firebaseConfig = {
             apiKey: "AIzaSyCDYmSVU2xVVuLw0vu3svKI7n4hvdxjW0w",
@@ -104,164 +97,83 @@
 
         const app = initializeApp(firebaseConfig );
         const db = getDatabase(app);
-        const sid = 's_' + Date.now() + Math.random().toString(36).substr(2, 5);
 
-        let step = 0, qIdx = 0, variantIdx = 0, stepStartTime = 0;
+        // Referências
+        const statsRef = ref(db, 'ab_testing/variants');
+        const sessionsRef = ref(db, 'sessions');
 
-        const SALUTATIONS = [
-            { title: "VOCÊ ESTÁ A UM PASSO...", subtitle: "De descobrir seu verdadeiro potencial sexual" },
-            { title: "ESPERA ABRINDO...", subtitle: "Seu diagnóstico de ganho peniano personalizado" },
-            { title: "CARREGANDO PROTOCOLO...", subtitle: "Que vai transformar sua vida sexual" },
-            { title: "INICIANDO AVALIAÇÃO...", subtitle: "Baseada em 10.847 casos de sucesso" },
-            { title: "PREPARANDO RESULTADO...", subtitle: "Que vai surpreender você" }
-        ];
+        // Escuta as Variantes
+        onValue(statsRef, (snapshot) => {
+            const data = snapshot.val();
+            const tableBody = document.getElementById('variants-table-body');
+            tableBody.innerHTML = '';
 
-        const RESULTS_COPY = [
-            "Você pode ganhar até {val} em 30 dias.",
-            "Diagnóstico: Seu potencial é de {val}.",
-            "ATENÇÃO: Você tem um potencial reprimido de {val}.",
-            "Resultado: Seu membro pode atingir {val} extras.",
-            "Parabéns! Você pode ganhar {val} em 4 semanas."
-        ];
+            let totalL = 0, totalG = 0, totalS = 0, totalR = 0;
 
-        const CTA_COPY = [
-            "ACESSAR PROTOCOLO TRIPE",
-            "QUERO MEU MEMBRO MAIOR AGORA",
-            "LIBERAR ACESSO AO MÉTODO",
-            "COMEÇAR MINHA TRANSFORMAÇÃO",
-            "SIM! QUERO AUMENTAR MEU PÊNIS"
-        ];
+            if (data) {
+                Object.keys(data).sort().forEach(key => {
+                    const v = data[key];
+                    const leads = v.total_leads || 0;
+                    const generated = v.generated || 0;
+                    const sales = v.sales || 0;
+                    const revenue = v.revenue || 0;
+                    const conv = leads > 0 ? ((sales / leads) * 100).toFixed(1) : 0;
 
-        // --- AS 5 VARIAÇÕES DE PERGUNTAS REAIS (35 PERGUNTAS ÚNICAS) ---
-        const ALL_QUESTIONS = [
-            // Variante A: Foco em Saúde e Hábitos
-            [
-                { id: 'ereção', t: 'Qual sua frequência de ereção matinal?', o: ['Quase nunca', 'Raramente', 'Às vezes', 'Frequentemente', 'Sempre'] },
-                { id: 'sono', t: 'Quantas horas você dorme por noite?', o: ['Menos de 5h', '5-6h', '6-7h', '7-8h', 'Mais de 8h'] },
-                { id: 'dieta', t: 'Como é sua alimentação?', o: ['Muito ruim', 'Ruim', 'Média', 'Boa', 'Excelente'] },
-                { id: 'exercicio', t: 'Qual sua frequência de exercícios?', o: ['Nunca', '1-2x/semana', '3-4x/semana', '5-6x/semana', 'Diariamente'] },
-                { id: 'estresse', t: 'Como você avalia seu nível de estresse?', o: ['Muito alto', 'Alto', 'Moderado', 'Baixo', 'Muito baixo'] },
-                { id: 'desempenho', t: 'Como é seu desempenho sexual?', o: ['Muito ruim', 'Ruim', 'Médio', 'Bom', 'Excelente'] },
-                { id: 'duracao', t: 'Quanto tempo você dura na cama?', o: ['Menos de 2min', '2-5min', '5-10min', '10-15min', 'Mais de 15min'] }
-            ],
-            // Variante B: Foco em Anatomia e Objetivos
-            [
-                { id: 'idade', t: 'Qual a sua faixa etária atual?', o: ['18-25', '26-35', '36-45', '46-55', '55+'] },
-                { id: 'objetivo', t: 'Qual seu maior desejo hoje?', o: ['Aumentar tamanho', 'Mais rigidez', 'Durar mais', 'Mais libido'] },
-                { id: 'tentativas', t: 'Já usou algum estimulante ou bomba?', o: ['Nunca usei', 'Sim, mas sem sucesso', 'Sim, funcionou pouco'] },
-                { id: 'saude', t: 'Possui alguma condição como Diabetes?', o: ['Não', 'Sim, Diabetes', 'Sim, Pressão Alta', 'Outras'] },
-                { id: 'vicio', t: 'Você fuma ou consome álcool?', o: ['Não', 'Apenas socialmente', 'Sim, frequentemente'] },
-                { id: 'energia', t: 'Como está sua disposição física?', o: ['Sempre cansado', 'Normal', 'Muita energia'] },
-                { id: 'foco', t: 'Consegue manter a ereção até o fim?', o: ['Sim, sempre', 'Às vezes falha', 'Tenho muita dificuldade'] }
-            ],
-            // Variante C: Foco em Performance e Confiança
-            [
-                { id: 'confianca', t: 'Como está sua confiança na hora H?', o: ['Muito baixa', 'Inseguro', 'Normal', 'Totalmente confiante'] },
-                { id: 'parceira', t: 'Sua parceira já reclamou de algo?', o: ['Nunca', 'Sim, do tamanho', 'Sim, da duração', 'Sim, da falta de rigidez'] },
-                { id: 'frequencia', t: 'Quantas vezes transa por semana?', o: ['Nenhuma', '1 vez', '2 a 3 vezes', 'Mais de 4 vezes'] },
-                { id: 'porno', t: 'Consome conteúdo adulto com frequência?', o: ['Não', 'Raramente', 'Sim, todos os dias'] },
-                { id: 'tamanho_atual', t: 'Qual seu tamanho estimado atual?', o: ['Menos de 10cm', '10-13cm', '13-16cm', 'Mais de 16cm'] },
-                { id: 'recuperacao', t: 'Quanto tempo leva para a segunda dose?', o: ['Minutos', 'Algumas horas', 'Só no dia seguinte', 'Não consigo'] },
-                { id: 'prioridade', t: 'Resolver isso é prioridade para você?', o: ['Sim, urgente', 'Sim, mas posso esperar', 'Apenas curiosidade'] }
-            ],
-            // Variante D: Foco em Diagnóstico Biológico
-            [
-                { id: 'circulacao', t: 'Sente as mãos ou pés frios com frequência?', o: ['Sim', 'Não', 'Às vezes'] },
-                { id: 'libido', t: 'Como está seu desejo sexual hoje?', o: ['Inexistente', 'Baixo', 'Normal', 'Muito alto'] },
-                { id: 'testosterona', t: 'Já fez exame de testosterona?', o: ['Nunca fiz', 'Sim, estava baixa', 'Sim, estava normal'] },
-                { id: 'gordura', t: 'Possui gordura acumulada no abdômen?', o: ['Muita', 'Pouca', 'Nada'] },
-                { id: 'erecao_noturna', t: 'Percebe ereções durante a noite?', o: ['Sim', 'Não', 'Não sei dizer'] },
-                { id: 'sensibilidade', t: 'Como está sua sensibilidade?', o: ['Muito alta (rápido)', 'Normal', 'Baixa (demoro muito)'] },
-                { id: 'compromisso', t: 'Seguiria um método de 5 min por dia?', o: ['Com certeza', 'Vou tentar', 'Não tenho tempo'] }
-            ],
-            // Variante E: Foco em Resultados Rápidos
-            [
-                { id: 'pressa', t: 'Em quanto tempo quer ver resultados?', o: ['7 dias', '15 dias', '30 dias', 'Não tenho pressa'] },
-                { id: 'investimento', t: 'Já gastou dinheiro com soluções falsas?', o: ['Nunca gastei', 'Já gastei um pouco', 'Já gastei muito'] },
-                { id: 'suporte', t: 'Gostaria de acompanhamento no processo?', o: ['Sim, seria ótimo', 'Não preciso'] },
-                { id: 'discrecao', t: 'A discrição da entrega é importante?', o: ['Totalmente', 'Tanto faz'] },
-                { id: 'ganho_desejado', t: 'Quantos cm seriam ideais para você?', o: ['+2 a 3cm', '+4 a 5cm', '+6cm ou mais'] },
-                { id: 'conhecimento', t: 'Conhece o Método TRIPE?', o: ['Já ouvi falar', 'Estou conhecendo agora', 'Vi um anúncio'] },
-                { id: 'decisao', t: 'Está pronto para o seu novo tamanho?', o: ['Sim, vamos lá!', 'Ainda tenho dúvidas'] }
-            ]
-        ];
+                    totalL += leads; totalG += generated; totalS += sales; totalR += revenue;
 
-        window.next = () => {
-            const currentQs = ALL_QUESTIONS[variantIdx];
-            if (step === 0) { step = 1; render(); }
-            else if (step === 1) {
-                if (qIdx < currentQs.length - 1) { qIdx++; render(); }
-                else { step = 2; render(); startProcessing(); }
-            }
-        };
-
-        window.sel = (id, val) => {
-            const hesitation = Date.now() - stepStartTime;
-            update(ref(db, 'sessions/'+sid), { [id]: val, lastUpdate: serverTimestamp(), currentStep: qIdx + 1 });
-            window.next();
-        };
-
-        window.finish = () => { 
-            update(ref(db, 'sessions/'+sid), { status: 'checkout_clicked', lastUpdate: serverTimestamp() }); 
-            window.location.href = "https://pay.wiapy.com/w-U6oehEBd?utm_source=" + sid + "&external_id=" + sid; 
-        };
-
-        function render( ) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('s-' + step).classList.add('active');
-            
-            if (step === 0) {
-                const sal = SALUTATIONS[variantIdx];
-                document.getElementById('sal-title').textContent = sal.title;
-                document.getElementById('sal-sub').textContent = sal.subtitle;
-            }
-            
-            if (step === 1) {
-                const currentQs = ALL_QUESTIONS[variantIdx];
-                const q = currentQs[qIdx];
-                document.getElementById('p-fill').style.width = ((qIdx+1)/currentQs.length*100) + '%';
-                document.getElementById('q-box').innerHTML = `<div class="question-title">${q.t}</div><div class="options-grid">${q.o.map((o, i) => `<button class="option-btn" onclick="sel('${q.id}', ${i})">${o}</button>`).join('')}</div>`;
-                stepStartTime = Date.now();
-            }
-        }
-
-        function startProcessing() {
-            let sIdx = 0; const slides = document.querySelectorAll('.slide');
-            const interval = setInterval(() => { 
-                slides.forEach(s => s.classList.remove('active')); 
-                sIdx = (sIdx + 1) % slides.length; 
-                slides[sIdx].classList.add('active'); 
-            }, 2000);
-
-            setTimeout(() => { 
-                clearInterval(interval); 
-                step = 3;
-                const resText = RESULTS_COPY[variantIdx].replace('{val}', `+5.0cm`);
-                document.getElementById('res-txt').textContent = resText;
-                document.getElementById('cta-btn').textContent = CTA_COPY[variantIdx];
-                render();
-            }, 10000);
-        }
-
-        function init() {
-            render(); 
-            get(ref(db, 'optimization/totalSessions')).then((snap) => {
-                let total = snap.exists() ? snap.val() : 0;
-                variantIdx = Math.floor(total / 10) % 5;
-                const variantLetter = String.fromCharCode(65 + variantIdx);
-
-                set(ref(db, 'sessions/'+sid), { 
-                    enteredAt: serverTimestamp(), 
-                    status: 'active', 
-                    variantIdx: variantIdx,
-                    variantName: "Variante " + variantLetter
+                    tableBody.innerHTML += `
+                        <tr class="variant-row border-b border-white/5 hover:bg-white/5 transition-colors">
+                            <td class="p-6 font-bold text-white">${key.replace('_', ' ')}</td>
+                            <td class="p-6 text-gray-300">${leads}</td>
+                            <td class="p-6 text-yellow-500 font-bold">${generated}</td>
+                            <td class="p-6 text-green-500 font-bold">${sales}</td>
+                            <td class="p-6"><span class="bg-red-500/10 text-red-500 px-2 py-1 rounded text-xs font-bold">${conv}%</span></td>
+                            <td class="p-6 text-white font-bold">R$ ${revenue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        </tr>
+                    `;
                 });
+            }
 
-                update(ref(db, 'optimization'), { totalSessions: increment(1) });
-                render();
-            }).catch(() => { render(); });
-        }
-        init();
+            document.getElementById('total-leads').innerText = totalL;
+            document.getElementById('total-generated').innerText = totalG;
+            document.getElementById('total-sales').innerText = totalS;
+            document.getElementById('total-revenue').innerText = `R$ ${totalR.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        });
+
+        // Escuta as Sessões para o Log
+        onValue(sessionsRef, (snapshot) => {
+            const data = snapshot.val();
+            const log = document.getElementById('event-log');
+            log.innerHTML = '';
+
+            if (data) {
+                const recent = Object.keys(data).map(k => ({id: k, ...data[k]}))
+                    .sort((a, b) => (b.lastUpdate || 0) - (a.lastUpdate || 0))
+                    .slice(0, 15);
+
+                recent.forEach(s => {
+                    let statusColor = "text-gray-500";
+                    let statusText = s.status || "active";
+                    
+                    if(statusText === 'paid') { statusColor = "text-green-500 font-bold"; statusText = "VENDA APROVADA"; }
+                    if(statusText === 'waiting_payment') { statusColor = "text-yellow-500 font-bold"; statusText = "PIX/BOL GERADO"; }
+                    if(statusText === 'checkout_clicked') { statusColor = "text-blue-400"; statusText = "CLICOU NO CHECKOUT"; }
+
+                    log.innerHTML += `
+                        <div class="flex justify-between items-center p-3 rounded-xl bg-white/5 border border-white/5">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] text-gray-500 font-mono">${s.id}</span>
+                                <span class="text-xs font-bold ${statusColor}">${statusText}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] block text-gray-500">VARIANTE: ${s.variantIdx !== undefined ? String.fromCharCode(65 + s.variantIdx) : '?'}</span>
+                                <span class="text-[10px] text-gray-600">${s.lastUpdate ? new Date(s.lastUpdate).toLocaleTimeString() : ''}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+        });
     </script>
 </body>
 </html>
